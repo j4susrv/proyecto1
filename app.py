@@ -34,7 +34,7 @@ def principal():
 def load_user(user_id):
     return Administrador.query.get(int(user_id))
 
-
+#Ingreso de Administradores
 @app.route('/AdministradoresLosRockstarslogin', methods=['GET', 'POST'])
 def login_admin():
     form_acceso = FormularioLoginAdministrador()
@@ -92,7 +92,7 @@ def registro_admin():
 
     return render_template('registrarse_admin.html', form_registro=form)
 
-
+#Cerrar sesion
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required  
 def logout_admin():

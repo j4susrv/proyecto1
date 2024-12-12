@@ -8,7 +8,7 @@ class ControladorAdministrador():
         # Hashea la contraseña antes de guardarla en la base de datos
         hashed_password = generate_password_hash(contraseña)
 
-        # Crear una nueva instancia del administrador
+        # Crear una nueva instancia del administrador.
         nuevo_admin = Administrador(correo=correo, contraseña=hashed_password)
 
         # Guardar en la base de datos
