@@ -55,7 +55,6 @@
     </script>
     <button>Holaa</button>
     {% if current_user.is_authenticated and current_user.es_admin() %}
-        <!-- Mostrar solo si el usuario está autenticado y es un administrador -->
         <a href="{{ url_for('logout_admin') }}" class="btn btn-danger">Cerrar sesión</a>
     {% endif %}
 

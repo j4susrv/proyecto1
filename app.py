@@ -34,7 +34,7 @@ def principal():
 def load_user(user_id):
     return Administrador.query.get(int(user_id))
 
-#Login para Administradores que esta fallando!!
+
 @app.route('/AdministradoresLosRockstarslogin', methods=['GET', 'POST'])
 def login_admin():
     form_acceso = FormularioLoginAdministrador()
@@ -43,21 +43,19 @@ def login_admin():
         correo = form_acceso.correo.data
         contraseña = form_acceso.contraseña.data
 
-        # Obtener el administrador por correo
         admin = Administrador.obtener_por_correo(correo)
 
         if admin:
-            # Verificar si la contraseña es correcta
             if admin.chequeo_clave(contraseña):
-                login_user(admin)  # Usar Flask-Login para iniciar sesión
+                login_user(admin)  
                 flash("Inicio de sesión exitoso", category="success")
-                return redirect("/")  # Redirigir a la página principal o página de inicio de sesión
+                return redirect("/") 
             else:
                 flash("Contraseña incorrecta", category="danger")
         else:
             flash("Usuario no encontrado", category="danger")
 
-    # Renderizar la página de login con el formulario y los posibles errores
+
     return render_template("sesion_admin.html", form_acceso=form_acceso)
 
 
@@ -66,7 +64,7 @@ def login_admin():
 @app.route('/AdministradoresLosRockstarsregistro', methods=['GET', 'POST'])
 def registro_admin():
     if not current_user.is_anonymous:
-        return redirect("/")  # Redirigir al inicio si el usuario ya está autenticado
+        return redirect("/") 
 
     form = FormularioRegistroAdministrador()
     
@@ -91,20 +89,20 @@ def registro_admin():
         flash(f"Registro exitoso para el usuario {correo}", "success")
         return redirect("/AdministradoresLosRockstarslogin")
 
-    # Renderizar el formulario con errores si los hay
+
     return render_template('registrarse_admin.html', form_registro=form)
 
 
 @app.route('/logout', methods=['GET', 'POST'])
-@login_required  # Asegura que el usuario esté logueado
+@login_required  
 def logout_admin():
-    if current_user.es_admin():  # Solo permite cerrar sesión si el usuario es un administrador
-        logout_user()  # Cierra la sesión
+    if current_user.es_admin(): 
+        logout_user()  
         flash("Has cerrado sesión exitosamente.", category="success")
         return redirect("/") 
     else:
         flash("Acción no permitida. No eres un administrador.", category="danger")
-        return redirect("/")  # Redirige al inicio o a alguna página de error
+        return redirect("/")
 
 
 
@@ -123,7 +121,6 @@ def register():
         # Convertir la fecha de nacimiento a formato datetime
         fecha_nacimiento = datetime.strptime(fecha_nacimiento, '%Y-%m-%d')
 
-        # Creando un nuevo registro de usuario
         nuevo_usuario = Usuario(
             nombre_apellido=nombre_apellido,
             rut_pasaporte=rut_pasaporte,
@@ -137,6 +134,6 @@ def register():
         db.session.commit()
 
         flash("Usuario registrado con éxito.", "success")
-        return redirect(url_for('register'))  # Redirigir al formulario de registro
+        return redirect(url_for('register')) 
 
     return render_template('registro.html')

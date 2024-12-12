@@ -9,8 +9,6 @@ ADMINISTRADOR
     <div class="row">
         <div class="col-md-6 offset-md-3">
             <h2 class="text-center mb-4">Iniciar sesión como administrador</h2>
-
-            <!-- Bloque para mostrar mensajes flash -->
             {% with messages = get_flashed_messages(with_categories=True) %}
                 {% if messages %}
                     {% for category, message in messages %}
@@ -21,12 +19,9 @@ ADMINISTRADOR
                     {% endfor %}
                 {% endif %}
             {% endwith %}
-
-            <!-- Formulario de inicio de sesión -->
             <form method="POST">
                 {{ form_acceso.hidden_tag() }}
 
-                <!-- Campo de correo -->
                 <div class="form-group">
                     <label for="correo">Correo Electrónico</label>
                     {{ form_acceso.correo(class="form-control", id="correo", placeholder="tuemail@gmail.com") }}
@@ -39,7 +34,6 @@ ADMINISTRADOR
                     {% endif %}
                 </div>
 
-                <!-- Campo de contraseña -->
                 <div class="form-group">
                     <label for="contraseña">Contraseña</label>
                     {{ form_acceso.contraseña(class="form-control", id="contraseña", placeholder="********") }}
@@ -52,7 +46,6 @@ ADMINISTRADOR
                     {% endif %}
                 </div>
 
-                <!-- Botón de envío -->
                 <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
             </form>
         </div>
