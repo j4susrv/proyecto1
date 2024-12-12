@@ -34,7 +34,7 @@ def principal():
 def load_user(user_id):
     return Administrador.query.get(int(user_id))
 
-
+#Login para Administradores que esta fallando!!
 @app.route('/AdministradoresLosRockstarslogin', methods=['GET', 'POST'])
 def login_admin():
     form_acceso = FormularioRegistroLoginAdministrador()
@@ -54,6 +54,7 @@ def login_admin():
             return redirect("/")
     return render_template("sesion_admin.html", form_acceso=form_acceso)
 
+#Registro de administradores funcional. Guarda en la base de datos
 @app.route('/AdministradoresLosRockstarsregistro', methods=['GET', 'POST'])
 def registro_admin():
     if not current_user.is_anonymous:

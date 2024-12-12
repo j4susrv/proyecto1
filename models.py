@@ -51,6 +51,7 @@ class Habitacion(db.Model):
 
     reservas = db.relationship("Reserva", back_populates="habitacion")
 
+#Clase administrador, con el hash y el check password
 class Administrador(db.Model):
     __tablename__ = "administradores"
     id = db.Column(db.Integer, primary_key=True)
