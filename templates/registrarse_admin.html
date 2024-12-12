@@ -1,24 +1,79 @@
-{% extends "base_template.html"%}
+{% extends "base_template.html" %}
+
 {% block titulo %}
 REGISTRO ADMINISTRADORES
-{% endblock%}
+{% endblock %}
 
-{% block content%}
+{% block content %}
 <div class="container">
     <div class="row">
         <div class="col-md-6 offset-md-3">
             <h2 class="text-center mb-4">Registrarse como administrador</h2>
+
+            <!-- Bloque para mostrar mensajes flash -->
+            {% with messages = get_flashed_messages(with_categories=True) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Formulario de registro -->
             <form method="POST">
                 {{ form_registro.hidden_tag() }}
-                {{ form_registro.correo(class="form-control", placeholder="Tu correo electrónico") }}
-                <label for="correo">Correo Electrónico</label>
-                {{ form_registro.contraseña(class="form-control", placeholder="Contraseña") }}
-                <label for="contraseña">Contraseña</label>
-                {{ form_registro.confirmar_contraseña(class="form-control", placeholder="Confirmar Contraseña") }}
-                <label for="confirmar_contraseña">Confirmar Contraseña</label>
+
+                <!-- Campo de correo -->
+                <div class="form-group">
+                    <label for="correo">Correo Electrónico</label>
+                    {{ form_registro.correo(class="form-control", id="correo", placeholder="Tu correo electrónico") }}
+                    {% if form_registro.correo.errors %}
+                        <small class="text-danger">
+                            {% for error in form_registro.correo.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </small>
+                    {% endif %}
+                </div>
+
+                <!-- Campo de contraseña -->
+                <div class="form-group">
+                    <label for="contraseña">Contraseña</label>
+                    {{ form_registro.contraseña(class="form-control", id="contraseña", placeholder="Contraseña") }}
+                    {% if form_registro.contraseña.errors %}
+                        <small class="text-danger">
+                            {% for error in form_registro.contraseña.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </small>
+                    {% endif %}
+                </div>
+
+                <!-- Campo de confirmación de contraseña -->
+                <div class="form-group">
+                    <label for="confirmar_contraseña">Confirmar Contraseña</label>
+                    {{ form_registro.confirmar_contraseña(class="form-control", id="confirmar_contraseña", placeholder="Confirmar Contraseña") }}
+                    {% if form_registro.confirmar_contraseña.errors %}
+                        <small class="text-danger">
+                            {% for error in form_registro.confirmar_contraseña.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </small>
+                    {% endif %}
+                </div>
+
+                <!-- Botón de envío -->
                 <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
+
+                <!-- Enlace para los usuarios ya registrados -->
+                <div class="mt-3">
+                    <a href="/AdministradoresLosRockstarslogin">Si estás registrado, inicia sesión aquí.</a>
+                </div>
             </form>
         </div>
     </div>
 </div>
-{% endblock%}
+{% endblock %}

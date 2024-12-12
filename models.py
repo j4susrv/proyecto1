@@ -18,7 +18,8 @@ class Usuario(UserMixin, db.Model):
 
 
     reservas = db.relationship("Reserva", back_populates="usuario")
-
+    def es_admin(self):
+        return False
     @staticmethod 
     def obtener_por_correo(correo):
         usuario = Usuario.query.filter_by(correo=correo).first()
@@ -52,7 +53,7 @@ class Habitacion(db.Model):
     reservas = db.relationship("Reserva", back_populates="habitacion")
 
 #Clase administrador, con el hash y el check password
-class Administrador(db.Model):
+class Administrador(UserMixin,db.Model):
     __tablename__ = "administradores"
     id = db.Column(db.Integer, primary_key=True)
     correo = db.Column(db.String(50), nullable=False, unique=True) 
@@ -62,7 +63,8 @@ class Administrador(db.Model):
         self.contraseña = generate_password_hash(contraseña)
     def chequeo_clave(self, contraseña):
         return check_password_hash(self.contraseña, contraseña)
-
+    def es_admin(self):
+        return True
     @staticmethod
     def obtener_por_correo(correo):
         return Administrador.query.filter_by(correo=correo).first()

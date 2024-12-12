@@ -19,7 +19,7 @@ login_manager.login_view = "login_admin"  # Página de login cuando el usuario n
 Migrate(app, db)
 
 # Importar los formularios y modelos
-from forms import FormularioRegistro, FormularioRegistroLoginAdministrador
+from forms import FormularioRegistro, FormularioLoginAdministrador, FormularioRegistroAdministrador
 from controlers import ControladorAdministrador
 from models import Usuario, Administrador
 
@@ -37,55 +37,74 @@ def load_user(user_id):
 #Login para Administradores que esta fallando!!
 @app.route('/AdministradoresLosRockstarslogin', methods=['GET', 'POST'])
 def login_admin():
-    form_acceso = FormularioRegistroLoginAdministrador()
+    form_acceso = FormularioLoginAdministrador()
+
     if form_acceso.validate_on_submit():
         correo = form_acceso.correo.data
         contraseña = form_acceso.contraseña.data
 
-        admin = Administrador.obtener_por_correo(form_acceso.correo.data, correo)
+        # Obtener el administrador por correo
+        admin = Administrador.obtener_por_correo(correo)
+
         if admin:
+            # Verificar si la contraseña es correcta
             if admin.chequeo_clave(contraseña):
-                return redirect("/")
+                login_user(admin)  # Usar Flask-Login para iniciar sesión
+                flash("Inicio de sesión exitoso", category="success")
+                return redirect("/")  # Redirigir a la página principal o página de inicio de sesión
             else:
-                print("Contraseña incorrecta")
-                return redirect("/")
+                flash("Contraseña incorrecta", category="danger")
         else:
-            print("Usuario no encontrado")
-            return redirect("/")
+            flash("Usuario no encontrado", category="danger")
+
+    # Renderizar la página de login con el formulario y los posibles errores
     return render_template("sesion_admin.html", form_acceso=form_acceso)
+
+
 
 #Registro de administradores funcional. Guarda en la base de datos
 @app.route('/AdministradoresLosRockstarsregistro', methods=['GET', 'POST'])
 def registro_admin():
     if not current_user.is_anonymous:
-        return render_template("index.html")
-    form = FormularioRegistroLoginAdministrador()  # Inicializa el formulario
-    if request.method == 'POST':  # Si el método es POST, validamos el formulario
-        if form.validate_on_submit():
-            print("Formulario válido")
-            flash("Formulario válido")
-            
-            correo = form.correo.data 
-            contraseña = form.contraseña.data 
-            confirmar_contraseña=form.confirmar_contraseña.data
-            
-            admin = Administrador().obtener_por_correo(correo)
-            
-            if admin is not None:
-                error = f"El correo {correo} ya se encuentra registrado"
-                print(error)
-                flash(error)
-                return render_template("registrarse_admin.html ", form_registro = form)
+        return redirect("/")  # Redirigir al inicio si el usuario ya está autenticado
 
-            ControladorAdministrador().crear_usuario( correo, contraseña,confirmar_contraseña)
-            flash(f'Registro exitoso para el usuario {correo}')
-            return redirect("/AdministradoresLosRockstarslogin")
-        else:
-            print("Formulario inválido")
-            flash("Formulario inválido")
+    form = FormularioRegistroAdministrador()
+    
+    if form.validate_on_submit():
+        correo = form.correo.data
+        contraseña = form.contraseña.data
+        confirmar_contraseña = form.confirmar_contraseña.data
 
-    # Cuando accedemos a /register con GET o si hay un error de validación
-    return render_template('registrarse_admin.html', form_registro = form)
+        # Verificar si las contraseñas coinciden
+        if contraseña != confirmar_contraseña:
+            flash("Las contraseñas no coinciden", "danger")
+            return render_template("registrarse_admin.html", form_registro=form)
+
+        # Verificar si el correo ya está registrado
+        admin = Administrador().obtener_por_correo(correo)
+        if admin is not None:
+            flash(f"El correo {correo} ya se encuentra registrado.", "danger")
+            return render_template("registrarse_admin.html", form_registro=form)
+
+        # Crear el usuario
+        ControladorAdministrador().crear_usuario(correo, contraseña)
+        flash(f"Registro exitoso para el usuario {correo}", "success")
+        return redirect("/AdministradoresLosRockstarslogin")
+
+    # Renderizar el formulario con errores si los hay
+    return render_template('registrarse_admin.html', form_registro=form)
+
+
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required  # Asegura que el usuario esté logueado
+def logout_admin():
+    if current_user.es_admin():  # Solo permite cerrar sesión si el usuario es un administrador
+        logout_user()  # Cierra la sesión
+        flash("Has cerrado sesión exitosamente.", category="success")
+        return redirect("/") 
+    else:
+        flash("Acción no permitida. No eres un administrador.", category="danger")
+        return redirect("/")  # Redirige al inicio o a alguna página de error
 
 
 

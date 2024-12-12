@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, PasswordField, EmailField, TextAreaField, IntegerField, DateField
-from wtforms.validators import DataRequired, Email, Length, EqualTo
+from wtforms.validators import DataRequired, Email, Length, EqualTo, InputRequired
 class FormularioRegistro(FlaskForm):    
     nombre_apellido     = StringField('nombre_apellido', validators=[DataRequired(), Length(min=3, max=50)])
     rut_pasaporte       = StringField('rut',validators=[DataRequired()])
@@ -11,9 +11,13 @@ class FormularioRegistro(FlaskForm):
     Submit              = SubmitField('Registrarme')
 
 
-class FormularioRegistroLoginAdministrador(FlaskForm):
-    correo = EmailField("Correo", validators=[DataRequired(), Email()])
-    contraseña = PasswordField("Contraseña", validators=[DataRequired(), Length(min=6, max=20), EqualTo('confirmar_contraseña', message="Las contraseñas no coinciden.")])
-    confirmar_contraseña = PasswordField("Confirmar Contraseña", validators=[DataRequired()])
-    submit = SubmitField("Registrarse")
+class FormularioLoginAdministrador(FlaskForm):
+    correo = StringField('Correo', validators=[DataRequired(message="El correo es obligatorio."),Email(message="Ingresa un correo válido.")])
+    contraseña = PasswordField('Contraseña', validators=[DataRequired(message="La contraseña es obligatoria."),Length(min=6, message="La contraseña debe tener al menos 6 caracteres.")])
+    submit = SubmitField('Iniciar Sesion')
     
+class FormularioRegistroAdministrador(FlaskForm):
+    correo = StringField('Correo Electrónico', validators=[InputRequired(), Email()])
+    contraseña = PasswordField('Contraseña', validators=[InputRequired()])
+    confirmar_contraseña = PasswordField('Confirmar Contraseña', validators=[DataRequired(message="La confirmación de la contraseña es obligatoria."),EqualTo('contraseña', message="Las contraseñas no coinciden.")])
+    Submit = SubmitField("Registrarme")

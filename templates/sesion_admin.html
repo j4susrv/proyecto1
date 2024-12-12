@@ -9,12 +9,50 @@ ADMINISTRADOR
     <div class="row">
         <div class="col-md-6 offset-md-3">
             <h2 class="text-center mb-4">Iniciar sesión como administrador</h2>
+
+            <!-- Bloque para mostrar mensajes flash -->
+            {% with messages = get_flashed_messages(with_categories=True) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Formulario de inicio de sesión -->
             <form method="POST">
                 {{ form_acceso.hidden_tag() }}
-                {{ form_acceso.correo(class="form-control", id="correo", placeholder="tuemail@gmail.com") }}
-                <label for="correo">Correo Electrónico</label>
-                {{ form_acceso.contraseña(class="form-control", id="contraseña", placeholder="********") }}
-                <label for="contraseña">Contraseña</label>
+
+                <!-- Campo de correo -->
+                <div class="form-group">
+                    <label for="correo">Correo Electrónico</label>
+                    {{ form_acceso.correo(class="form-control", id="correo", placeholder="tuemail@gmail.com") }}
+                    {% if form_acceso.correo.errors %}
+                        <small class="text-danger">
+                            {% for error in form_acceso.correo.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </small>
+                    {% endif %}
+                </div>
+
+                <!-- Campo de contraseña -->
+                <div class="form-group">
+                    <label for="contraseña">Contraseña</label>
+                    {{ form_acceso.contraseña(class="form-control", id="contraseña", placeholder="********") }}
+                    {% if form_acceso.contraseña.errors %}
+                        <small class="text-danger">
+                            {% for error in form_acceso.contraseña.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </small>
+                    {% endif %}
+                </div>
+
+                <!-- Botón de envío -->
                 <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
             </form>
         </div>
