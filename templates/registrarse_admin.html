@@ -1,0 +1,24 @@
+{% extends "base_template.html"%}
+{% block titulo %}
+REGISTRO ADMINISTRADORES
+{% endblock%}
+
+{% block content%}
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <h2 class="text-center mb-4">Registrarse como administrador</h2>
+            <form method="POST">
+                {{ form_registro.hidden_tag() }}
+                {{ form_registro.correo(class="form-control", placeholder="Tu correo electrónico") }}
+                <label for="correo">Correo Electrónico</label>
+                {{ form_registro.contraseña(class="form-control", placeholder="Contraseña") }}
+                <label for="contraseña">Contraseña</label>
+                {{ form_registro.confirmar_contraseña(class="form-control", placeholder="Confirmar Contraseña") }}
+                <label for="confirmar_contraseña">Confirmar Contraseña</label>
+                <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock%}

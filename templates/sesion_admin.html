@@ -1,0 +1,23 @@
+{% extends "base_template.html" %}
+
+{% block titulo %}
+ADMINISTRADOR
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <h2 class="text-center mb-4">Iniciar sesión como administrador</h2>
+            <form method="POST">
+                {{ form_acceso.hidden_tag() }}
+                {{ form_acceso.correo(class="form-control", id="correo", placeholder="tuemail@gmail.com") }}
+                <label for="correo">Correo Electrónico</label>
+                {{ form_acceso.contraseña(class="form-control", id="contraseña", placeholder="********") }}
+                <label for="contraseña">Contraseña</label>
+                <button type="submit" class="btn btn-primary btn-block">Iniciar Sesión</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
