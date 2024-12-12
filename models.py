@@ -54,8 +54,8 @@ class Habitacion(db.Model):
 class Administrador(db.Model):
     __tablename__ = "administradores"
     id = db.Column(db.Integer, primary_key=True)
-    correo = db.Column(db.String(50), nullable=False, unique=True)  # Correo no puede ser nulo
-    contraseña = db.Column(db.String(255), nullable=False)  # Contraseña no puede ser nula
+    correo = db.Column(db.String(50), nullable=False, unique=True) 
+    contraseña = db.Column(db.String(255), nullable=False) 
 
     def establecer_clave(self, contraseña):
         self.contraseña = generate_password_hash(contraseña)
