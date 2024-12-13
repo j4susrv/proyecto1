@@ -1,0 +1,55 @@
+{% extends "base_template.html" %}
+
+{% block titulo %}
+Piezas Disponibles
+{% endblock %}
+
+{% block content%}
+<h2 class="text-center mb-5">Habitaciones Disponibles</h2>
+<div>
+    <a href="/">Inicio</a>
+</div>
+<div class="row">
+    {% for pieza in piezas %}
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm rounded-lg h-100 d-flex flex-column">
+                {% if pieza.imagen_pieza %}
+                    <div id="carousel{{ pieza.id }}" class="carousel slide" data-bs-ride="carousel">
+                        <div class="carousel-inner">
+                            {% for imagen in pieza.imagen_pieza.split(',') %}
+                                <div class="carousel-item {% if loop.index == 1 %}active{% endif %}">
+                                    <img src="{{ url_for('static', filename='imagenes/' + imagen) }}" class="d-block w-100 rounded-top" alt="Imagen de la habitación">
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ pieza.id }}" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Anterior</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ pieza.id }}" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Siguiente</span>
+                        </button>
+                    </div>
+                {% else %}
+                    <p>No hay imágenes disponibles para esta habitación.</p>
+                {% endif %}
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title text-center text-primary">{{ pieza.nombre_pieza }}</h5>
+                    <p class="card-text text-muted">{{ pieza.descripcion_pieza }}</p>
+                    <p class="card-text text-muted">
+                        <strong>Capacidad:</strong> {{ pieza.cantidad_personas }} personas
+                    </p>
+                    <p class="card-text text-muted">
+                        <strong>Precio:</strong> ${{ pieza.precio_pieza }} por noche
+                    </p>
+                    <div class="d-flex justify-content-between mt-auto">
+                        <a href="/registro" class="btn btn-primary">Reservar</a>
+                        <a href="/detalle/{{ pieza.id }}" class="btn btn-outline-secondary">Ver detalles</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -21,3 +21,11 @@ class FormularioRegistroAdministrador(FlaskForm):
     contraseña = PasswordField('Contraseña', validators=[InputRequired()])
     confirmar_contraseña = PasswordField('Confirmar Contraseña', validators=[DataRequired(message="La confirmación de la contraseña es obligatoria."),EqualTo('contraseña', message="Las contraseñas no coinciden.")])
     Submit = SubmitField("Registrarme")
+
+class FormularioPiesas(FlaskForm):
+    nombre_pieza        = StringField('nombre_pieza', validators=[DataRequired()])
+    descripcion_pieza   = StringField('descripcion_pieza', validators=[DataRequired()])
+    precio_pieza        = IntegerField('precio_pieza', validators=[DataRequired()])
+    cantidad_personas   = IntegerField('cantidad_personas', validators=[DataRequired()])
+    imagen_pieza        = StringField('nombre_pieza', validators=[DataRequired()])
+    Submit = SubmitField("Añadido")

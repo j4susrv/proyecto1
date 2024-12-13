@@ -1,0 +1,43 @@
+{% extends "base_template.html" %}
+
+{% block titulo %}
+Agregar piezas
+{% endblock %}
+
+{% block content %}
+{% if current_user.is_authenticated and current_user.es_admin() %}
+    <div class="container mt-4">
+        <h3>Agregar Habitación</h3>
+        <form action="{{ url_for('agregar_pieza') }}" method="post" enctype="multipart/form-data" class="form-container">
+            <div class="form-group">
+                <label for="nombre_pieza">Nombre de la habitación</label>
+                <input type="text" id="nombre_pieza" name="nombre_pieza" class="form-control" placeholder="Ej. Habitación Deluxe" required>
+            </div>
+            
+            <div class="form-group mt-3">
+                <label for="descripcion_pieza">Descripción</label>
+                <textarea id="descripcion_pieza" name="descripcion_pieza" class="form-control" rows="4" placeholder="Describe las características de la habitación" required></textarea>
+            </div>
+            
+            <div class="form-group mt-3">
+                <label for="cantidad_personas">Capacidad (Número de personas)</label>
+                <input type="number" id="cantidad_personas" name="cantidad_personas" class="form-control" min="1" placeholder="Ej. 2" required>
+            </div>
+            
+            <div class="form-group mt-3">
+                <label for="precio_pieza">Precio por noche</label>
+                <input type="number" id="precio_pieza" name="precio_pieza" class="form-control" step="0.01" min="0" placeholder="Ej. 100.00" required>
+            </div>
+            
+            <div class="form-group mt-3">
+                <label for="imagenes_pieza">Subir imágenes de la habitación</label>
+                <input type="file" id="imagenes_pieza" name="imagenes_pieza" class="form-control" multiple accept="image/*" required>
+            </div>
+    
+            <button type="submit" class="btn btn-primary mt-4">Enviar</button>
+        </form>
+    </div>
+{% else %}
+    <p>No tienes permiso para acceder a esta página.</p>
+{% endif %}
+{% endblock %}

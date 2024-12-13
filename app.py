@@ -4,32 +4,46 @@ from flask_migrate import Migrate  # Versiones de bases de datos
 from flask_login import LoginManager, logout_user, current_user, login_required, login_user
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-import re
+from werkzeug.utils import secure_filename
+from flask import jsonify
+import re, os
+
+UPLOAD_FOLDER = 'static/imagenes'  
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "losrockstars"  # Clave secreta para la sesión
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://root@localhost/rockstars"  # URI de la base de datos
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False  # Deshabilitar el seguimiento de modificaciones
+app.config["SECRET_KEY"] = "losrockstars"  
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://root@localhost/rockstars"  
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False 
+app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'imagenes') 
+app.config['ALLOWED_EXTENSIONS'] = {'jpg', 'jpeg', 'png', 'gif'}
+
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.makedirs(app.config['UPLOAD_FOLDER'])
+
 db = SQLAlchemy(app)
 
 # Inicialización de LoginManager
 login_manager = LoginManager(app)
-login_manager.login_view = "login_admin"  # Página de login cuando el usuario no está autenticado
+login_manager.login_view = "login_admin" 
 
 Migrate(app, db)
 
 # Importar los formularios y modelos
 from forms import FormularioRegistro, FormularioLoginAdministrador, FormularioRegistroAdministrador
 from controlers import ControladorAdministrador
-from models import Usuario, Administrador
+from models import Usuario, Administrador, Pieza, Reserva
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 @app.route("/")
 def principal():
-    return render_template("base_template.html")
+    piezas = Pieza.query.all()
+    return render_template("base_template.html", piezas = piezas)
 
 
-# Configurar el cargador de usuario para Flask-Login
+
 @login_manager.user_loader
 def load_user(user_id):
     return Administrador.query.get(int(user_id))
@@ -104,7 +118,10 @@ def logout_admin():
         flash("Acción no permitida. No eres un administrador.", category="danger")
         return redirect("/")
 
-
+@app.route("/vista_piezas")
+def vista_piezas():
+    piezas = Pieza.query.all()
+    return render_template("piezas_disponibles.html", piezas = piezas)
 
 @app.route('/registro', methods=['GET', 'POST'])
 def register():
@@ -134,6 +151,77 @@ def register():
         db.session.commit()
 
         flash("Usuario registrado con éxito.", "success")
-        return redirect(url_for('register')) 
+        return redirect(url_for('principal')) 
 
     return render_template('registro.html')
+
+@app.route('/agregarpieza', methods=['GET', 'POST'])
+def agregar_pieza():
+    if request.method == 'POST':
+        nombre_pieza = request.form['nombre_pieza']
+        descripcion_pieza = request.form['descripcion_pieza']
+        cantidad_personas = int(request.form['cantidad_personas'])
+        precio_pieza = float(request.form['precio_pieza'])
+
+        # Subir las imágenes
+        imagenes = []
+        if 'imagenes_pieza' not in request.files:
+            flash("No se seleccionaron archivos.", "danger")
+            return redirect(request.url)
+
+        files = request.files.getlist('imagenes_pieza')
+        for file in files:
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(filepath)
+                imagenes.append(filename)
+
+        # Crear la nueva pieza
+        nueva_pieza = Pieza(
+            nombre_pieza=nombre_pieza,
+            descripcion_pieza=descripcion_pieza,
+            cantidad_personas=cantidad_personas,
+            precio_pieza=precio_pieza,
+            imagen_pieza=",".join(imagenes)  
+        )
+
+        db.session.add(nueva_pieza)
+        db.session.commit()
+
+        flash("Habitación agregada con éxito.", "success")
+
+        
+        return redirect(url_for('vista_piezas')) 
+
+   
+    return render_template('agregar_piezas.html') 
+
+
+@app.route('/reservar', methods=['POST'])
+def reservar():
+    data = request.json
+    pieza_id = data.get('pieza_id')
+    fecha_inicio = data.get('fecha_inicio')
+    fecha_fin = data.get('fecha_fin')
+    usuario_id = current_user.id  
+
+    if not pieza_id or not fecha_inicio or not fecha_fin:
+        return jsonify({'error': 'Faltan datos para procesar la reserva.'}), 400
+
+    # Convertir las fechas a formato datetime
+    fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d')
+    fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d')
+
+    
+    nueva_reserva = Reserva(
+        pieza_id=pieza_id,
+        fecha_inicio=fecha_inicio,
+        fecha_fin=fecha_fin,
+        usuario_id=usuario_id
+    )
+
+    db.session.add(nueva_reserva)
+    db.session.commit()
+
+    return jsonify({'mensaje': 'Reserva realizada con éxito.'})

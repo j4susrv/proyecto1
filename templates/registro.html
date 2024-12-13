@@ -2,7 +2,12 @@
 {% block content %}
 <div class="container">
   <h3>Ingresa tus datos</h3>
+
   <form action="/registro" method="post" class="form-container">
+    <input type="hidden" name="pieza_id" value="{{ pieza_id }}">
+    <input type="hidden" name="fecha_inicio" value="{{ fecha_inicio }}">
+    <input type="hidden" name="fecha_fin" value="{{ fecha_fin }}">
+
     <div class="form-group">
       <label for="nombre_apellido">Nombre y Apellido:</label>
       <input type="text" id="nombre_apellido" name="nombre_apellido" required>
@@ -33,93 +38,7 @@
       <input type="email" id="correo" name="correo" required>
     </div>
 
-    <button type="submit" class="submit-button">Enviar</button>
+    <button type="submit" class="btn btn-primary mt-3">Enviar</button>
   </form>
 </div>
-<style>
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: 'Arial', sans-serif;
-  background-color: #f8f8f8;
-  color: #333;
-}
-
-.container {
-  max-width: 600px;
-  margin: 50px auto;
-  padding: 20px;
-  background-color: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.form-title {
-  text-align: center;
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #555;
-}
-
-.user-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-}
-
-.form-group label {
-  font-size: 14px;
-  margin-bottom: 5px;
-  color: #555;
-}
-
-.form-group input {
-  font-size: 16px;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  transition: border-color 0.3s ease;
-}
-
-.form-group input:focus {
-  border-color: #007bff;
-  outline: none;
-}
-.submit-btn {
-  padding: 10px 20px;
-  font-size: 16px;
-  color: white;
-  background-color: #e74c3c; 
-  border: 2px solid white;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.submit-btn:hover {
-    background-color: #c0392b; 
-}
-
-@media (max-width: 768px) {
-  .container {
-    padding: 15px;
-  }
-
-  .form-title {
-    font-size: 20px;
-  }
-}
-</style>
 {% endblock %}
-
-   

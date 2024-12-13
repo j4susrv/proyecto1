@@ -29,30 +29,7 @@ class Usuario(UserMixin, db.Model):
     def obtener_por_id(id):
         print(f"Consultando por el usuario con id{id} en db")
         return Usuario.query.get(id)
- 
-class Reserva(db.Model):
-    __tablename__ = 'reservas'
-
-    id = db.Column(db.Integer, primary_key=True)
-    fecha_entrada = db.Column(db.Date, nullable=False)
-    fecha_salida = db.Column(db.Date, nullable=False)
     
-    usuario_id = db.Column(db.Integer, ForeignKey('usuarios.id'), nullable=False) 
-    habitacion_id = db.Column(db.Integer, ForeignKey('habitaciones.id'), nullable=False)  
-
-    usuario = relationship("Usuario", back_populates="reservas")
-    habitacion = relationship("Habitacion", back_populates="reservas")
-
-class Habitacion(db.Model):
-    __tablename__ = 'habitaciones'
-
-    id = db.Column(db.Integer, primary_key=True)
-    numero = db.Column(db.String(10), nullable=False)
-    tipo = db.Column(db.String(50), nullable=False)
-
-    reservas = db.relationship("Reserva", back_populates="habitacion")
-
-#Funcional
 class Administrador(UserMixin,db.Model):
     __tablename__ = "administradores"
     id = db.Column(db.Integer, primary_key=True)
@@ -68,3 +45,28 @@ class Administrador(UserMixin,db.Model):
     @staticmethod
     def obtener_por_correo(correo):
         return Administrador.query.filter_by(correo=correo).first()
+ 
+class Reserva(db.Model):
+    __tablename__ = 'reservas'
+
+    id = db.Column(db.Integer, primary_key=True)
+    fecha_entrada = db.Column(db.Date, nullable=False)
+    fecha_salida = db.Column(db.Date, nullable=False)
+    usuario_id = db.Column(db.Integer, ForeignKey('usuarios.id'), nullable=False) 
+    habitacion_id = db.Column(db.Integer, ForeignKey('habitaciones.id'), nullable=False)  
+
+    usuario = relationship("Usuario", back_populates="reservas")
+    habitacion = relationship("Pieza", back_populates="reservas") 
+
+
+    
+class Pieza(db.Model):
+    __tablename__ = "habitaciones"
+    id = db.Column(db.Integer, primary_key=True)
+    nombre_pieza = db.Column(db.String(100), nullable=False)
+    imagen_pieza = db.Column(db.String(200), nullable=True)
+    descripcion_pieza = db.Column(db.Text, nullable=False)
+    cantidad_personas = db.Column(db.Integer, nullable=False)
+    precio_pieza = db.Column(db.Float, nullable=False)
+
+    reservas = db.relationship('Reserva', back_populates='habitacion', lazy=True)  
