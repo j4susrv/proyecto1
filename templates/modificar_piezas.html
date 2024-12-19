@@ -1,0 +1,37 @@
+{% extends "base_template.html" %}
+
+{% block titulo %}
+Modificar Habitaciones
+{% endblock %}
+
+{% block content %}
+{% if current_user.is_authenticated and current_user.es_admin() %}
+<form method="POST" enctype="multipart/form-data">
+    <label>Nombre de la pieza:</label>
+    <input type="text" name="nombre_pieza" value="{{ pieza.nombre_pieza }}" required>
+
+    <label>Descripción:</label>
+    <textarea name="descripcion_pieza" required>{{ pieza.descripcion_pieza }}</textarea>
+
+    <label>Cantidad de personas:</label>
+    <input type="number" name="cantidad_personas" value="{{ pieza.cantidad_personas }}" required>
+
+    <label>Precio:</label>
+    <input type="text" name="precio_pieza" value="{{ pieza.precio_pieza }}" required>
+
+    <label>Imágenes actuales:</label>
+    {% for img in pieza.imagen_pieza.split(',') %}
+        <img src="{{ url_for('static', filename='imagenes/' ~ img) }}" alt="Imagen" style="width:100px;">
+    {% endfor %}
+
+    <label>Subir nuevas imágenes:</label>
+    <input type="file" name="imagenes_pieza" multiple>
+
+    <button type="submit">Guardar cambios</button>
+    <button type="submit" name="eliminar" value="eliminar">Eliminar habitación</button>
+</form>
+
+{% else %}
+    <p>No tienes permiso para acceder a esta página.</p>
+{% endif %}
+{% endblock %}

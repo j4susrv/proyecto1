@@ -1,44 +1,187 @@
 {% extends "base_template.html" %}
+
 {% block content %}
 <div class="container">
-  <h3>Ingresa tus datos</h3>
+  <h3 class="text-center mb-4">Reserva tu Habitación</h3>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="alert-container">
+        {% for category, message in messages %}
+          <div class="alert {% if category == 'danger' %}alert-danger{% elif category == 'success' %}alert-success{% endif %} mt-3">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
 
-  <form action="/registro" method="post" class="form-container">
-    <input type="hidden" name="pieza_id" value="{{ pieza_id }}">
-    <input type="hidden" name="fecha_inicio" value="{{ fecha_inicio }}">
-    <input type="hidden" name="fecha_fin" value="{{ fecha_fin }}">
+  <form action="{{ url_for('register', habitacion_id=pieza_id) }}" method="POST" class="form-container shadow p-4 rounded bg-light">
+    <input type="hidden" name="habitacion_id" value="{{ pieza_id }}">
 
-    <div class="form-group">
-      <label for="nombre_apellido">Nombre y Apellido:</label>
-      <input type="text" id="nombre_apellido" name="nombre_apellido" required>
+    <div class="form-group mb-3">
+      <label for="llegada" class="font-weight-bold">Fecha de Llegada</label>
+      <input type="date" id="llegada" name="llegada" value="{{ llegada }}" required class="form-control">
     </div>
 
-    <div class="form-group">
-      <label for="rut_pasaporte">N° Rut o N° Pasaporte:</label>
-      <input type="text" id="rut_pasaporte" name="rut_pasaporte" required>
+    <div class="form-group mb-3">
+      <label for="salida" class="font-weight-bold">Fecha de Salida</label>
+      <input type="date" id="salida" name="salida" value="{{ salida }}" required class="form-control">
     </div>
 
-    <div class="form-group">
-      <label for="fecha_nacimiento">Fecha de Nacimiento:</label>
-      <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" required>
+    <div class="form-group mb-3">
+      <label for="personas" class="font-weight-bold">Cantidad de Personas</label>
+      <input type="text" id="personas" name="personas" placeholder="1" required class="form-control">
+      <small class="form-text text-muted">Máximo: {{ capacidad_habitacion }} persona(s)</small>
+    </div>
+  
+    <div class="form-group mb-3">
+      <label for="nombre_apellido" class="font-weight-bold">Nombre y Apellido</label>
+      <input type="text" id="nombre_apellido" name="nombre_apellido" required class="form-control">
     </div>
 
-    <div class="form-group">
-      <label for="pais">País:</label>
-      <input type="text" id="pais" name="pais" required>
+    <div class="form-group mb-3">
+      <label for="fecha_nacimiento" class="font-weight-bold">Fecha de Nacimiento</label>
+      <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" required class="form-control">
     </div>
 
-    <div class="form-group">
-      <label for="numero_celular">Número de Celular:</label>
-      <input type="tel" id="numero_celular" name="numero_celular" required>
+    <div class="form-group mb-3">
+      <label for="pais" class="font-weight-bold">País</label>
+      <select id="pais" name="pais" class="form-control pais-select" required>
+        <option value="AR" data-img="/static/banderas/ar.png">Argentina</option>
+        <option value="BR" data-img="/static/banderas/br.png">Brasil</option>
+        <option value="CA" data-img="/static/banderas/ca.png">Canadá</option>
+        <option value="CL" data-img="/static/banderas/cl.png">Chile</option>
+        <option value="CO" data-img="/static/banderas/co.png">Colombia</option>
+        <option value="MX" data-img="/static/banderas/mx.png">México</option>
+        <option value="PE" data-img="/static/banderas/pe.png">Perú</option>
+        <option value="US" data-img="/static/banderas/us.png">Estados Unidos</option>
+        <option value="UY" data-img="/static/banderas/uy.png">Uruguay</option>
+        <option value="VE" data-img="/static/banderas/ve.png">Venezuela</option>
+        <option value="FR" data-img="/static/banderas/fr.png">Francia</option>
+        <option value="DE" data-img="/static/banderas/de.png">Alemania</option>
+        <option value="IT" data-img="/static/banderas/it.png">Italia</option>
+        <option value="NL" data-img="/static/banderas/nl.png">Países Bajos</option>
+        <option value="PT" data-img="/static/banderas/pt.png">Portugal</option>
+        <option value="ES" data-img="/static/banderas/es.png">España</option>
+        <option value="SE" data-img="/static/banderas/se.png">Suecia</option>
+        <option value="CH" data-img="/static/banderas/ch.png">Suiza</option>
+        <option value="GB" data-img="/static/banderas/gb.png">Reino Unido</option>
+        <option value="AU" data-img="/static/banderas/au.png">Australia</option>
+        <option value="IN" data-img="/static/banderas/in.png">India</option>
+        <option value="CN" data-img="/static/banderas/cn.png">China</option>
+        <option value="JP" data-img="/static/banderas/jp.png">Japón</option>
+        <option value="KR" data-img="/static/banderas/kr.png">Corea del Sur</option>
+        <option value="RU" data-img="/static/banderas/ru.png">Rusia</option>
+        <option value="ZA" data-img="/static/banderas/za.png">Sudáfrica</option>
+      </select>
+    </div>
+    <div id="rut_field" class="form-group mb-3" style="display: none;">
+      <label for="rut" class="font-weight-bold">RUT</label>
+      <input type="text" id="rut" name="rut" class="form-control">
+    </div>
+    <div id="pasaporte_field" class="form-group mb-3" style="display: none;">
+      <label for="pasaporte" class="font-weight-bold">Pasaporte</label>
+      <input type="text" id="pasaporte" name="pasaporte" class="form-control">
     </div>
 
-    <div class="form-group">
-      <label for="correo">Correo Electrónico:</label>
-      <input type="email" id="correo" name="correo" required>
+    <div class="form-group mb-3">
+      <label for="numero_celular" class="font-weight-bold">Número de Celular</label>
+      <input type="tel" id="numero_celular" name="numero_celular" required class="form-control">
     </div>
 
-    <button type="submit" class="btn btn-primary mt-3">Enviar</button>
+    <div class="form-group mb-3">
+      <label for="correo" class="font-weight-bold">Correo Electrónico</label>
+      <input type="email" id="correo" name="correo" required class="form-control">
+    </div>
+
+    <button type="submit" class="btn btn-primary btn-lg btn-block mt-4">Reservar</button>
   </form>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+
+<script>
+  $(document).ready(function() {
+    $('#pais').select2({
+      width: '100%', 
+      templateResult: function(state) {
+        if (!state.id) { return state.text; }
+        var imgUrl = $(state.element).data('img'); 
+        var $state = $('<span><img src="' + imgUrl + '" style="width: 20px; height: 15px; margin-right: 10px;" /> ' + state.text + '</span>');
+        return $state;
+      },
+      templateSelection: function(state) {
+        var imgUrl = $(state.element).data('img'); 
+        var $state = $('<span><img src="' + imgUrl + '" style="width: 20px; height: 15px; margin-right: 10px;" /> ' + state.text + '</span>');
+        return $state;
+      }
+    });
+    $('#pais').on('change', function() {
+      var selectedCountry = $(this).val();
+      if (selectedCountry === 'CL') {
+        $('#rut_field').show();
+        $('#pasaporte_field').hide();
+        $('#rut').attr('required', true);
+        $('#pasaporte').removeAttr('required');
+      } else {
+        $('#rut_field').hide();
+        $('#pasaporte_field').show();
+        $('#rut').removeAttr('required');
+        $('#pasaporte').attr('required', true);
+      }
+    });
+    if ($('#pais').val()) {
+      $('#pais').trigger('change');  
+    }
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementById("llegada").setAttribute("min", today);
+
+    $('#llegada').on('change', function() {
+      var llegadaDate = new Date($(this).val());
+      var salidaDate = new Date($('#salida').val());
+      if (llegadaDate > salidaDate) {
+        $('#salida').val($(this).val());
+      }
+      $('#salida').attr('min', $(this).val());
+    });
+  });
+  $(document).ready(function() {
+    // Ocultar el campo de salida al cargar la página
+    $('#salida').parent().hide();
+
+    // Manejar el cambio de la fecha de llegada
+    $('#llegada').on('change', function() {
+      var llegadaDate = $(this).val();
+
+      // Verificar si hay una fecha de llegada seleccionada
+      if (llegadaDate) {
+        $('#salida').parent().show(); // Mostrar el campo de salida
+        $('#salida').attr('min', llegadaDate); // Configurar el mínimo para la salida
+      } else {
+        $('#salida').parent().hide(); // Ocultar el campo de salida si no hay llegada seleccionada
+        $('#salida').val(''); // Limpiar el valor de salida
+      }
+    });
+
+    // Configurar fecha mínima para la llegada
+    var today = new Date().toISOString().split('T')[0];
+    document.getElementById("llegada").setAttribute("min", today);
+
+    // Asegurar consistencia entre fechas de llegada y salida
+    $('#salida').on('change', function() {
+      var llegadaDate = new Date($('#llegada').val());
+      var salidaDate = new Date($(this).val());
+
+      if (llegadaDate > salidaDate) {
+        alert("La fecha de salida no puede ser anterior a la de llegada.");
+        $(this).val('');
+      }
+    });
+  });
+
+</script>
 {% endblock %}

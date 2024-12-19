@@ -1,65 +1,62 @@
 from app import db
 from flask_login import UserMixin, LoginManager
-from werkzeug.security import generate_password_hash, check_password_hash #seguridad
-from sqlalchemy import Column, Integer, ForeignKey, DateTime,Date
+from werkzeug.security import generate_password_hash, check_password_hash  # seguridad
+from sqlalchemy import Column, Integer, ForeignKey, DateTime, Date
 from sqlalchemy.orm import relationship
 from datetime import date
 
 
-class Usuario(UserMixin, db.Model):
-    __tablename__ = "usuarios"
+class Usuario(db.Model):
+    __tablename__ = 'usuarios'
     id = db.Column(db.Integer, primary_key=True)
-    nombre_apellido = db.Column(db.String(50), nullable=False)
-    correo = db.Column(db.String(50), unique=True, nullable=False)  
-    rut_pasaporte = db.Column(db.String(30), nullable=False)  
-    pais = db.Column(db.String(50), nullable=False)
-    numero_celular = db.Column(db.Integer, nullable= False)
-    fecha_nacimiento = db.Column(db.Date, nullable = False)
+    nombre_apellido = db.Column(db.String(100), nullable=False)
+    correo = db.Column(db.String(100), nullable=False, unique=True)
+    rut_pasaporte = db.Column(db.String(50), nullable=True) 
+    pais = db.Column(db.String(2), nullable=False) 
+    numero_celular = db.Column(db.String(20), nullable=False)
+    fecha_nacimiento = db.Column(db.Date, nullable=False)
+    fecha_llegada = db.Column(db.Date, nullable = False)
+    fecha_salida = db.Column(db.Date, nullable = False)
+    cantidad_personas = db.Column(db.Integer, nullable = False)
+    habitacion_id = db.Column(db.Integer, db.ForeignKey('habitaciones.id'), nullable=False)
 
+    reservas = db.relationship('Reserva', back_populates='usuario', lazy=True)
 
-    reservas = db.relationship("Reserva", back_populates="usuario")
     def es_admin(self):
         return False
-    @staticmethod 
+
+    @staticmethod
     def obtener_por_correo(correo):
         usuario = Usuario.query.filter_by(correo=correo).first()
         print(f"Consultando por el usuario {usuario} en db")
-        return(usuario)
+        return usuario
+
     @staticmethod
     def obtener_por_id(id):
         print(f"Consultando por el usuario con id{id} en db")
         return Usuario.query.get(id)
-    
-class Administrador(UserMixin,db.Model):
+
+
+class Administrador(UserMixin, db.Model):
     __tablename__ = "administradores"
     id = db.Column(db.Integer, primary_key=True)
-    correo = db.Column(db.String(50), nullable=False, unique=True) 
-    contraseña = db.Column(db.String(255), nullable=False) 
+    correo = db.Column(db.String(50), nullable=False, unique=True)
+    contraseña = db.Column(db.String(255), nullable=False)
 
     def establecer_clave(self, contraseña):
         self.contraseña = generate_password_hash(contraseña)
+
     def chequeo_clave(self, contraseña):
         return check_password_hash(self.contraseña, contraseña)
+
     def es_admin(self):
         return True
+
     @staticmethod
     def obtener_por_correo(correo):
         return Administrador.query.filter_by(correo=correo).first()
- 
-class Reserva(db.Model):
-    __tablename__ = 'reservas'
-
-    id = db.Column(db.Integer, primary_key=True)
-    fecha_entrada = db.Column(db.Date, nullable=False)
-    fecha_salida = db.Column(db.Date, nullable=False)
-    usuario_id = db.Column(db.Integer, ForeignKey('usuarios.id'), nullable=False) 
-    habitacion_id = db.Column(db.Integer, ForeignKey('habitaciones.id'), nullable=False)  
-
-    usuario = relationship("Usuario", back_populates="reservas")
-    habitacion = relationship("Pieza", back_populates="reservas") 
 
 
-    
 class Pieza(db.Model):
     __tablename__ = "habitaciones"
     id = db.Column(db.Integer, primary_key=True)
@@ -69,4 +66,17 @@ class Pieza(db.Model):
     cantidad_personas = db.Column(db.Integer, nullable=False)
     precio_pieza = db.Column(db.Float, nullable=False)
 
-    reservas = db.relationship('Reserva', back_populates='habitacion', lazy=True)  
+    reservas = db.relationship('Reserva', back_populates='habitacion', lazy=True)
+
+
+class Reserva(db.Model):
+    __tablename__ = 'reservas'
+    id = db.Column(db.Integer, primary_key=True)
+    habitacion_id = db.Column(db.Integer, db.ForeignKey('habitaciones.id'), nullable=False)
+    fecha_llegada = db.Column(db.Date, nullable=False)
+    fecha_salida = db.Column(db.Date, nullable=False)
+    cantidad_personas = db.Column(db.Integer, nullable=False)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+
+    habitacion = db.relationship('Pieza', back_populates='reservas', lazy=True)
+    usuario = db.relationship('Usuario', back_populates='reservas', lazy=True)

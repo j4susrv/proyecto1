@@ -2,7 +2,7 @@ from flask import Flask, render_template, flash, redirect, request, url_for
 from flask_sqlalchemy import SQLAlchemy  # Base de datos
 from flask_migrate import Migrate  # Versiones de bases de datos
 from flask_login import LoginManager, logout_user, current_user, login_required, login_user
-from datetime import datetime
+from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask import jsonify
@@ -118,42 +118,72 @@ def logout_admin():
         flash("Acción no permitida. No eres un administrador.", category="danger")
         return redirect("/")
 
-@app.route("/vista_piezas")
-def vista_piezas():
-    piezas = Pieza.query.all()
-    return render_template("piezas_disponibles.html", piezas = piezas)
+@app.route("/registro/<int:habitacion_id>", methods=['GET', 'POST'])
+def register(habitacion_id):
 
-@app.route('/registro', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        # Obtener los datos del formulario
+    habitacion = Pieza.query.get(habitacion_id)
+    if not habitacion:
+        flash("Habitación no encontrada.", "danger")
+        return redirect(url_for('vista_piezas'))  
+
+    if request.method == "POST":
         nombre_apellido = request.form['nombre_apellido']
-        rut_pasaporte = request.form['rut_pasaporte']
+        rut_pasaporte = request.form.get('rut') or request.form.get('pasaporte')
         fecha_nacimiento = request.form['fecha_nacimiento']
         pais = request.form['pais']
         numero_celular = request.form['numero_celular']
         correo = request.form["correo"]
+        personas = request.form.get('personas')
 
+        if not personas or not personas.strip().isdigit():
+            flash("La cantidad de personas debe ser un número válido mayor a 0.", "danger")
+            return redirect(url_for('register', habitacion_id=habitacion_id))
+        personas = int(personas)
+        if personas > habitacion.cantidad_personas:
+            flash(f"La habitación solo tiene capacidad para {habitacion.cantidad_personas} personas.", "danger")
+            return redirect(url_for('register', habitacion_id=habitacion_id))
+        
+        llegada = request.form.get('llegada')
+        salida = request.form.get('salida')
 
-        # Convertir la fecha de nacimiento a formato datetime
-        fecha_nacimiento = datetime.strptime(fecha_nacimiento, '%Y-%m-%d')
-
+        overlapping_reservas = Reserva.query.filter(
+            Reserva.habitacion_id == habitacion_id,
+            db.or_(db.and_(Reserva.fecha_llegada <= salida,Reserva.fecha_salida >= llegada))).all()
+        if overlapping_reservas:
+            flash("La habitación ya está reservada para las fechas seleccionadas.", "danger")
+            return redirect(url_for('register', habitacion_id=habitacion_id))
         nuevo_usuario = Usuario(
             nombre_apellido=nombre_apellido,
             rut_pasaporte=rut_pasaporte,
             fecha_nacimiento=fecha_nacimiento,
             pais=pais,
             numero_celular=numero_celular,
-            correo=correo
+            correo=correo,
+            fecha_llegada=llegada,
+            fecha_salida=salida,
+            cantidad_personas=personas,
+            habitacion_id = habitacion_id
         )
-
         db.session.add(nuevo_usuario)
         db.session.commit()
 
-        flash("Usuario registrado con éxito.", "success")
-        return redirect(url_for('principal')) 
+        nueva_reserva = Reserva(
+            habitacion_id=habitacion_id,
+            fecha_llegada=llegada,
+            fecha_salida=salida,
+            cantidad_personas=personas,
+            usuario_id=nuevo_usuario.id
+        )
+        db.session.add(nueva_reserva)
+        db.session.commit()
 
-    return render_template('registro.html')
+        flash("Usuario y reserva registrados con éxito.", "success")
+        return redirect(url_for('principal'))
+    llegada = request.args.get('llegada')
+    salida = request.args.get('salida')
+    cantidad_personas = request.args.get('personas')
+
+    return render_template('registro.html', llegada=llegada, salida=salida, cantidad_personas=cantidad_personas, pieza_id=habitacion_id, capacidad_habitacion=habitacion.cantidad_personas)
 
 @app.route('/agregarpieza', methods=['GET', 'POST'])
 def agregar_pieza():
@@ -177,7 +207,6 @@ def agregar_pieza():
                 file.save(filepath)
                 imagenes.append(filename)
 
-        # Crear la nueva pieza
         nueva_pieza = Pieza(
             nombre_pieza=nombre_pieza,
             descripcion_pieza=descripcion_pieza,
@@ -190,38 +219,54 @@ def agregar_pieza():
         db.session.commit()
 
         flash("Habitación agregada con éxito.", "success")
-
-        
         return redirect(url_for('vista_piezas')) 
-
-   
     return render_template('agregar_piezas.html') 
 
 
-@app.route('/reservar', methods=['POST'])
-def reservar():
-    data = request.json
-    pieza_id = data.get('pieza_id')
-    fecha_inicio = data.get('fecha_inicio')
-    fecha_fin = data.get('fecha_fin')
-    usuario_id = current_user.id  
+@app.route('/modificarpieza/<int:id_pieza>', methods=['GET', 'POST'])
+def modificar_pieza(id_pieza):
 
-    if not pieza_id or not fecha_inicio or not fecha_fin:
-        return jsonify({'error': 'Faltan datos para procesar la reserva.'}), 400
+    pieza = Pieza.query.get_or_404(id_pieza)
 
-    # Convertir las fechas a formato datetime
-    fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d')
-    fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d')
+    if request.method == 'POST':
+        pieza.nombre_pieza = request.form['nombre_pieza']
+        pieza.descripcion_pieza = request.form['descripcion_pieza']
+        pieza.cantidad_personas = int(request.form['cantidad_personas'])
+        pieza.precio_pieza = float(request.form['precio_pieza'])
 
-    
-    nueva_reserva = Reserva(
-        pieza_id=pieza_id,
-        fecha_inicio=fecha_inicio,
-        fecha_fin=fecha_fin,
-        usuario_id=usuario_id
-    )
+        imagenes = pieza.imagen_pieza.split(",") if pieza.imagen_pieza else []
+        if 'imagenes_pieza' in request.files:
+            files = request.files.getlist('imagenes_pieza')
+            for file in files:
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(file.filename)
+                    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                    file.save(filepath)
+                    imagenes.append(filename)
 
-    db.session.add(nueva_reserva)
-    db.session.commit()
+        pieza.imagen_pieza = ",".join(imagenes)
+        db.session.commit()
 
-    return jsonify({'mensaje': 'Reserva realizada con éxito.'})
+        flash("Pieza modificada con éxito.", "success")
+        return redirect(url_for('principal'))
+    return render_template('modificar_piezas.html', pieza=pieza)
+
+
+@app.route("/vista_piezas", methods=['POST'])
+def vista_piezas():
+
+    llegada = request.form.get('llegada')
+    salida = request.form.get('salida')
+    personas = request.form.get('personas', type=int)
+
+    if llegada and salida:
+        llegada = datetime.strptime(llegada, '%Y-%m-%d')
+        salida = datetime.strptime(salida, '%Y-%m-%d')
+        piezas_disponibles = Pieza.query.filter(
+            Pieza.cantidad_personas >= personas
+        ).filter(~Pieza.reservas.any(db.and_(Reserva.fecha_llegada < salida,Reserva.fecha_salida > llegada))).all()
+    else:
+        piezas_disponibles = Pieza.query.all()
+    return render_template("piezas_disponibles.html", piezas=piezas_disponibles, llegada=llegada, salida=salida, personas=personas)
+
+
