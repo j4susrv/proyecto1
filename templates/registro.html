@@ -95,6 +95,9 @@
     </div>
 
     <button type="submit" class="btn btn-primary btn-lg btn-block mt-4">Reservar</button>
+    {% if current_user.is_authenticated and current_user.es_admin() %}
+      <button type="submit" class="btn btn-primary btn-lg btn-block mt-4">Reservar</button>
+    {% endif %}
   </form>
 </div>
 
@@ -182,6 +185,9 @@
       }
     });
   });
-
+  document.addEventListener('DOMContentLoaded', function() {
+            var today = new Date().toISOString().split('T')[0];
+            document.getElementById("fecha_nacimiento").setAttribute("max", today);
+        });
 </script>
 {% endblock %}

@@ -5,63 +5,75 @@ Piezas Disponibles
 {% endblock %}
 
 {% block content %}
-<h2 class="text-center mb-5">Habitaciones Disponibles</h2>
+<div style="background-color: white; padding: 20px;">
+    <h2 class="text-center mb-5">Habitaciones Disponibles</h2>
 
-<div>
-    <a href="/">Inicio</a>
-</div>
+    <div>
+        <a href="/">Inicio</a>
+    </div>
 
-<div class="row">
-    {% if piezas %}
-        {% for pieza in piezas %}
-            <div class="col-md-4 mb-4">
-                <div class="card shadow-sm rounded-lg h-100 d-flex flex-column">
-                    {% if pieza.imagen_pieza %}
-                    <div id="carousel{{ pieza.id }}" class="carousel slide" data-bs-ride="carousel">
-                        <div class="carousel-inner">
-                            {% for imagen in pieza.imagen_pieza.split(',') %}
-                                <div class="carousel-item {% if loop.index == 1 %}active{% endif %}">
-                                    <img src="{{ url_for('static', filename='imagenes/' + imagen) }}" class="d-block w-100 rounded-top" alt="Imagen de la habitación">
-                                </div>
-                            {% endfor %}
+    <div class="row">
+        {% if piezas %}
+            {% for pieza in piezas %}
+                <div class="col-md-4 mb-4">
+                    <div class="card shadow-sm rounded-lg h-100 d-flex flex-column">
+                        {% if pieza.imagen_pieza %}
+                        <div id="carousel{{ pieza.id }}" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                {% for imagen in pieza.imagen_pieza.split(',') %}
+                                    <div class="carousel-item {% if loop.index == 1 %}active{% endif %}">
+                                        <img src="{{ url_for('static', filename='imagenes/' + imagen) }}" class="d-block w-100 rounded-top" alt="Imagen de la habitación">
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ pieza.id }}" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Anterior</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ pieza.id }}" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Siguiente</span>
+                            </button>
                         </div>
-                        <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ pieza.id }}" data-bs-slide="prev">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Anterior</span>
-                        </button>
-                        <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ pieza.id }}" data-bs-slide="next">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="visually-hidden">Siguiente</span>
-                        </button>
-                    </div>
-                    {% else %}
-                    <div class="card-img-top" style="background-color: #f8f9fa; text-align: center;">
-                        <img src="{{ url_for('static', filename='imagenes/no-image.png') }}" alt="No hay imágenes disponibles" style="max-height: 200px; max-width: 100%;">
-                    </div>
-                    {% endif %}
-                
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title text-center text-primary">{{ pieza.nombre_pieza }}</h5>
-                        <p class="card-text text-muted">{{ pieza.descripcion_pieza }}</p>
-                        <p class="card-text text-muted">
-                            <strong>Capacidad:</strong> {{ pieza.cantidad_personas }} personas
-                        </p>
-                        <p class="card-text text-muted">
-                            <strong>Precio:</strong> ${{ pieza.precio_pieza }} por noche
-                        </p>
-                        <div class="d-flex justify-content-between mt-auto">
-                            <a href="{{ url_for('register', habitacion_id=pieza.id) }}" class="btn btn-primary">Reservar</a>
-                            <a href="/detalle/{{ pieza.id }}" class="btn btn-outline-secondary">Ver detalles</a>
-                            {% if current_user.is_authenticated and current_user.es_admin() %}
-                                <a href="/modificarpieza/{{ pieza.id }}" class="btn btn-warning">Modificar</a>
-                            {% endif %}
+                        {% else %}
+                        <div class="card-img-top" style="background-color: #f8f9fa; text-align: center;">
+                            <img src="{{ url_for('static', filename='imagenes/no-image.png') }}" alt="No hay imágenes disponibles" style="max-height: 200px; max-width: 100%;">
+                        </div>
+                        {% endif %}
+                    
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title text-center text-primary">{{ pieza.nombre_pieza }}</h5>
+                            <p class="card-text text-muted">{{ pieza.descripcion_pieza }}</p>
+                            <p class="card-text text-muted">
+                                <strong>Capacidad:</strong> {{ pieza.cantidad_personas }} personas
+                            </p>
+                            <p class="card-text text-muted">
+                                <strong>Precio original:</strong> 
+                                <span style="text-decoration: line-through; color: #888;">${{ pieza.precio_pieza }}</span>
+                            </p>
+                            <p class="card-text text-muted">
+                                <strong>Descuento:</strong> <span style="color: red;">{{ pieza.descuento }}%</span>
+                            </p>
+                            <p class="card-text text-muted">
+                                <strong>Precio con descuento:</strong> 
+                                <span style="color: green;">${{ pieza.precio_total }}</span>
+                                <small>por {{ dias_estancia }} noche(s)</small>
+                            </p>
+                            
+                            <div class="d-flex justify-content-between mt-auto">
+                                <a href="{{ url_for('register', habitacion_id=pieza.id) }}" class="btn btn-primary">Reservar</a>
+                                <a href="/detalle/{{ pieza.id }}" class="btn btn-outline-secondary">Ver detalles</a>
+                                {% if current_user.is_authenticated and current_user.es_admin() %}
+                                    <a href="/modificarpieza/{{ pieza.id }}" class="btn btn-warning">Modificar</a>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>No hay piezas disponibles para las fechas seleccionadas.</p>
-    {% endif %}
+            {% endfor %}
+        {% else %}
+            <p>No hay piezas disponibles para las fechas seleccionadas.</p>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}

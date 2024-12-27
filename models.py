@@ -64,8 +64,8 @@ class Pieza(db.Model):
     imagen_pieza = db.Column(db.String(200), nullable=True)
     descripcion_pieza = db.Column(db.Text, nullable=False)
     cantidad_personas = db.Column(db.Integer, nullable=False)
-    precio_pieza = db.Column(db.Float, nullable=False)
-
+    precio_pieza = db.Column(db.Integer, nullable=False)
+    descuento = db.Column(db.Float, default = 0)
     reservas = db.relationship('Reserva', back_populates='habitacion', lazy=True)
 
 

@@ -17,7 +17,16 @@ Modificar Habitaciones
     <input type="number" name="cantidad_personas" value="{{ pieza.cantidad_personas }}" required>
 
     <label>Precio:</label>
-    <input type="text" name="precio_pieza" value="{{ pieza.precio_pieza }}" required>
+    <input type="text" id="precio_pieza" name="precio_pieza" value="{{ pieza.precio_pieza }}" required>
+
+    <label>Descuento (%):</label>
+    <input type="number" id="descuento" name="descuento" value="{{ pieza.descuento }}" required>
+
+    <p>Precio final: 
+        <span id="precio_final">
+            {{ pieza.precio_pieza - (pieza.precio_pieza * pieza.descuento / 100) | round(2) }}
+        </span>
+    </p>
 
     <label>Imágenes actuales:</label>
     {% for img in pieza.imagen_pieza.split(',') %}
@@ -30,6 +39,25 @@ Modificar Habitaciones
     <button type="submit">Guardar cambios</button>
     <button type="submit" name="eliminar" value="eliminar">Eliminar habitación</button>
 </form>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const precioInput = document.getElementById('precio_pieza');
+        const descuentoInput = document.getElementById('descuento');
+        const precioFinal = document.getElementById('precio_final');
+
+        function actualizarPrecioFinal() {
+            const precio = parseFloat(precioInput.value) || 0;
+            const descuento = parseFloat(descuentoInput.value) || 0;
+            const precioConDescuento = precio - (precio * descuento / 100);
+            precioFinal.textContent = precioConDescuento.toFixed(2);
+        }
+
+        precioInput.addEventListener('input', actualizarPrecioFinal);
+        descuentoInput.addEventListener('input', actualizarPrecioFinal);
+    });
+</script>
 
 {% else %}
     <p>No tienes permiso para acceder a esta página.</p>

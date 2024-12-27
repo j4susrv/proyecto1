@@ -6,8 +6,7 @@ from datetime import datetime, timedelta
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask import jsonify
-import re, os
-
+import re, os 
 UPLOAD_FOLDER = 'static/imagenes'  
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
@@ -225,14 +224,20 @@ def agregar_pieza():
 
 @app.route('/modificarpieza/<int:id_pieza>', methods=['GET', 'POST'])
 def modificar_pieza(id_pieza):
-
     pieza = Pieza.query.get_or_404(id_pieza)
 
     if request.method == 'POST':
+        if 'eliminar' in request.form:
+            db.session.delete(pieza)
+            db.session.commit()
+            flash("Habitación eliminada con éxito.", "success")
+            return redirect(url_for('principal'))
+
         pieza.nombre_pieza = request.form['nombre_pieza']
         pieza.descripcion_pieza = request.form['descripcion_pieza']
         pieza.cantidad_personas = int(request.form['cantidad_personas'])
         pieza.precio_pieza = float(request.form['precio_pieza'])
+        pieza.descuento = float(request.form['descuento'])
 
         imagenes = pieza.imagen_pieza.split(",") if pieza.imagen_pieza else []
         if 'imagenes_pieza' in request.files:
@@ -249,24 +254,82 @@ def modificar_pieza(id_pieza):
 
         flash("Pieza modificada con éxito.", "success")
         return redirect(url_for('principal'))
+
     return render_template('modificar_piezas.html', pieza=pieza)
 
 
-@app.route("/vista_piezas", methods=['POST'])
+@app.route('/vista_piezas', methods=['POST'])
 def vista_piezas():
-
     llegada = request.form.get('llegada')
     salida = request.form.get('salida')
     personas = request.form.get('personas', type=int)
 
     if llegada and salida:
-        llegada = datetime.strptime(llegada, '%Y-%m-%d')
-        salida = datetime.strptime(salida, '%Y-%m-%d')
-        piezas_disponibles = Pieza.query.filter(
-            Pieza.cantidad_personas >= personas
-        ).filter(~Pieza.reservas.any(db.and_(Reserva.fecha_llegada < salida,Reserva.fecha_salida > llegada))).all()
+        if len(llegada) == 10 and len(salida) == 10:
+            if llegada[4] == '-' and llegada[7] == '-' and salida[4] == '-' and salida[7] == '-':
+                if not (llegada[:4].isdigit() and llegada[5:7].isdigit() and llegada[8:10].isdigit()):
+                    flash("La fecha de llegada no tiene un formato válido.", "danger")
+                    return redirect(url_for('vista_piezas'))
+
+                if not (salida[:4].isdigit() and salida[5:7].isdigit() and salida[8:10].isdigit()):
+                    flash("La fecha de salida no tiene un formato válido.", "danger")
+                    return redirect(url_for('vista_piezas'))
+
+                llegada = datetime.strptime(llegada, '%Y-%m-%d')
+                salida = datetime.strptime(salida, '%Y-%m-%d')
+
+                if salida <= llegada:
+                    flash("La fecha de salida debe ser posterior a la fecha de llegada.", "danger")
+                    return redirect(url_for('vista_piezas'))
+
+                piezas_disponibles = Pieza.query.filter(Pieza.cantidad_personas >= personas).filter(
+                    ~Pieza.reservas.any(db.and_(
+                        Reserva.fecha_llegada < salida,
+                        Reserva.fecha_salida > llegada
+                    ))
+                ).all()
+
+                dias_estancia = (salida - llegada).days
+                if dias_estancia <= 0:
+                    flash("La estancia debe ser de al menos un día.", "danger")
+                    return redirect(url_for('vista_piezas'))
+
+                for pieza in piezas_disponibles:
+                    pieza.precio_total = (pieza.precio_pieza - (pieza.precio_pieza * pieza.descuento / 100)) * dias_estancia
+
+            else:
+                flash("El formato de las fechas debe ser YYYY-MM-DD.", "danger")
+                return redirect(url_for('vista_piezas'))
+        else:
+            flash("Las fechas deben estar en formato YYYY-MM-DD.", "danger")
+            return redirect(url_for('vista_piezas'))
     else:
         piezas_disponibles = Pieza.query.all()
-    return render_template("piezas_disponibles.html", piezas=piezas_disponibles, llegada=llegada, salida=salida, personas=personas)
+        dias_estancia = 0  
+
+        for pieza in piezas_disponibles:
+            pieza.precio_total = pieza.precio_pieza - (pieza.precio_pieza * pieza.descuento / 100)
+
+    return render_template(
+        "piezas_disponibles.html", 
+        piezas=piezas_disponibles, 
+        llegada=llegada, 
+        salida=salida, 
+        personas=personas, 
+        dias_estancia=dias_estancia
+    )
+
+@app.route('/estadisticas', methods=['GET'])
+def estadisticas():
+    resultados = (db.session.query(Usuario.pais, db.func.sum(Usuario.cantidad_personas)).group_by(Usuario.pais).all())
+    estadisticas = {pais: cantidad for pais, cantidad in resultados}
+
+    habitacion_mas_reservada = (db.session.query(Pieza.nombre_pieza, Pieza.imagen_pieza, db.func.count(Reserva.id)).join(Reserva, Pieza.id == Reserva.habitacion_id).group_by(Pieza.id).order_by(db.func.count(Reserva.id).desc()).first()  )
+
+    return render_template(
+        'estadisticas.html',
+        estadisticas=estadisticas,
+        habitacion_mas_reservada=habitacion_mas_reservada
+    )
 
 

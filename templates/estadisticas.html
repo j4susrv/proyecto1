@@ -1,0 +1,70 @@
+{% extends "base_template.html" %}
+
+{% block titulo %}
+Estadísticas Administrador
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Estadísticas por País</h1>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <table class="table table-bordered table-striped table-hover">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>País</th>
+                        <th>Cantidad de Usuarios</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pais, cantidad in estadisticas.items() %}
+                    <tr>
+                        <td>{{ pais }}</td>
+                        <td>{{ cantidad }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card shadow-lg mb-4">
+        <div class="card-body">
+            <h3 class="text-center mb-4 text-primary">Habitación Más Reservada</h3>
+            {% if habitacion_mas_reservada %}
+                <div class="row justify-content-center">
+                    <div class="col-md-6 text-center">
+                        <h4 class="fw-bold text-dark">{{ habitacion_mas_reservada[0] }}</h4>
+                        <p class="text-muted mb-3">Total de Reservas: <strong>{{ habitacion_mas_reservada[2] }}</strong></p>
+                        
+                        {% set imagenes = habitacion_mas_reservada[1].split(',') %}
+                        <div id="carousel{{ habitacion_mas_reservada[0] }}" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                {% for imagen in imagenes %}
+                                    <div class="carousel-item {% if loop.index == 1 %}active{% endif %}">
+                                        <img src="{{ url_for('static', filename='imagenes/' ~ imagen.strip()) }}" 
+                                             alt="Imagen de {{ habitacion_mas_reservada[0] }}" 
+                                             class="d-block w-100 rounded-3 shadow-lg"
+                                             onerror="this.onerror=null;this.src='/static/imagenes/no-image.png';">
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ habitacion_mas_reservada[0] }}" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ habitacion_mas_reservada[0] }}" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p class="text-center text-muted">No hay reservas registradas.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
