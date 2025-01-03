@@ -6,40 +6,62 @@ Modificar Habitaciones
 
 {% block content %}
 {% if current_user.is_authenticated and current_user.es_admin() %}
-<form method="POST" enctype="multipart/form-data">
-    <label>Nombre de la pieza:</label>
-    <input type="text" name="nombre_pieza" value="{{ pieza.nombre_pieza }}" required>
+<div class="form-container">
+    <h2>Modificar Habitación</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="nombre_pieza">Nombre de la pieza:</label>
+            <input type="text" id="nombre_pieza" name="nombre_pieza" value="{{ pieza.nombre_pieza }}" required>
+        </div>
 
-    <label>Descripción:</label>
-    <textarea name="descripcion_pieza" required>{{ pieza.descripcion_pieza }}</textarea>
+        <div class="form-group">
+            <label for="descripcion_pieza">Descripción:</label>
+            <textarea id="descripcion_pieza" name="descripcion_pieza" required>{{ pieza.descripcion_pieza }}</textarea>
+        </div>
 
-    <label>Cantidad de personas:</label>
-    <input type="number" name="cantidad_personas" value="{{ pieza.cantidad_personas }}" required>
+        <div class="form-group">
+            <label for="cantidad_personas">Cantidad de personas:</label>
+            <input type="number" id="cantidad_personas" name="cantidad_personas" value="{{ pieza.cantidad_personas }}" required>
+        </div>
 
-    <label>Precio:</label>
-    <input type="text" id="precio_pieza" name="precio_pieza" value="{{ pieza.precio_pieza }}" required>
+        <div class="form-group">
+            <label for="precio_pieza">Precio:</label>
+            <input type="text" id="precio_pieza" name="precio_pieza" value="{{ pieza.precio_pieza }}" required>
+        </div>
 
-    <label>Descuento (%):</label>
-    <input type="number" id="descuento" name="descuento" value="{{ pieza.descuento }}" required>
+        <div class="form-group">
+            <label for="descuento">Descuento (%):</label>
+            <input type="number" id="descuento" name="descuento" value="{{ pieza.descuento }}" required>
+        </div>
 
-    <p>Precio final: 
-        <span id="precio_final">
-            {{ pieza.precio_pieza - (pieza.precio_pieza * pieza.descuento / 100) | round(2) }}
-        </span>
-    </p>
+        <div class="form-group">
+            <p>Precio final: 
+                <span id="precio_final">
+                    {{ pieza.precio_pieza - (pieza.precio_pieza * pieza.descuento / 100) | round(2) }}
+                </span>
+            </p>
+        </div>
 
-    <label>Imágenes actuales:</label>
-    {% for img in pieza.imagen_pieza.split(',') %}
-        <img src="{{ url_for('static', filename='imagenes/' ~ img) }}" alt="Imagen" style="width:100px;">
-    {% endfor %}
+        <div class="form-group">
+            <label>Imágenes actuales:</label>
+            <div class="imagenes">
+                {% for img in pieza.imagen_pieza.split(',') %}
+                    <img src="{{ url_for('static', filename='imagenes/' ~ img) }}" alt="Imagen" class="imagen-previa">
+                {% endfor %}
+            </div>
+        </div>
 
-    <label>Subir nuevas imágenes:</label>
-    <input type="file" name="imagenes_pieza" multiple>
+        <div class="form-group">
+            <label for="imagenes_pieza">Subir nuevas imágenes:</label>
+            <input type="file" name="imagenes_pieza" multiple>
+        </div>
 
-    <button type="submit">Guardar cambios</button>
-    <button type="submit" name="eliminar" value="eliminar">Eliminar habitación</button>
-</form>
-
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            <button type="submit" name="eliminar" value="eliminar" class="btn btn-danger">Eliminar habitación</button>
+        </div>
+    </form>
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -62,4 +84,108 @@ Modificar Habitaciones
 {% else %}
     <p>No tienes permiso para acceder a esta página.</p>
 {% endif %}
+<style>
+    .form-container {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+        margin: 50px auto;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .form-container h2 {
+        text-align: center;
+        margin-bottom: 25px;
+        font-size: 24px;
+        color: #333;
+        font-weight: 600;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 8px;
+        color: #555;
+    }
+
+    .form-group input, .form-group textarea {
+        width: 100%;
+        padding: 12px;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        background-color: #f8f8f8;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    .form-group input:focus, .form-group textarea:focus {
+        border-color: #4CAF50;
+        background-color: #fff;
+        outline: none;
+    }
+
+    .form-group textarea {
+        height: 150px;
+        resize: vertical;
+    }
+
+    .form-group p {
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+    }
+
+    .imagenes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .imagenes img {
+        width: 120px;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .form-actions {
+        text-align: center;
+        margin-top: 25px;
+    }
+
+    .btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-primary {
+        background-color: #4CAF50;
+        color: #fff;
+    }
+
+    .btn-primary:hover {
+        background-color: #45a049;
+    }
+
+    .btn-danger {
+        background-color: #f44336;
+        color: #fff;
+    }
+
+    .btn-danger:hover {
+        background-color: #e53935;
+    }
+</style>
+
 {% endblock %}
+

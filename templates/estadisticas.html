@@ -67,4 +67,97 @@ Estadísticas Administrador
         </div>
     </div>
 </div>
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Ganancias por Mes y Habitación</h1>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <canvas id="graficoGanancias"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+    async function obtenerDatosGrafico() {
+        try {
+            const response = await fetch('/api/datos_grafico');
+            if (!response.ok) {
+                throw new Error('Error al obtener datos del servidor');
+            }
+            const datosGrafico = await response.json();
+
+            renderizarGrafico(datosGrafico);
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    function renderizarGrafico(datosGrafico) {
+        const etiquetas = Object.keys(datosGrafico);
+        const nombresPiezas = new Set();
+        const datosPorHabitacion = {};
+
+        etiquetas.forEach(etiqueta => {
+            const habitaciones = datosGrafico[etiqueta];
+            for (const [nombre, ganancia] of Object.entries(habitaciones)) {
+                nombresPiezas.add(nombre);
+                if (!datosPorHabitacion[nombre]) {
+                    datosPorHabitacion[nombre] = [];
+                }
+                datosPorHabitacion[nombre].push(ganancia || 0); 
+            }
+        });
+
+        const datasets = Array.from(nombresPiezas).map(nombre => ({
+            label: nombre,
+            data: datosPorHabitacion[nombre],
+            backgroundColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.7)`,
+            borderColor: `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 1)`,
+            borderWidth: 1,
+        }));
+
+        const ctx = document.getElementById('graficoGanancias').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: etiquetas, 
+                datasets: datasets, 
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return `${context.dataset.label}: $${context.raw.toFixed(2)}`;
+                            },
+                        },
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Ganancias ($)',
+                        },
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Mes',
+                        },
+                    },
+                },
+            },
+        });
+    }
+
+    obtenerDatosGrafico();
+</script>
 {% endblock %}

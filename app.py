@@ -331,5 +331,53 @@ def estadisticas():
         estadisticas=estadisticas,
         habitacion_mas_reservada=habitacion_mas_reservada
     )
+@app.route('/api/datos_grafico', methods=['GET'])
+def api_datos_grafico():
+    resultados = (
+        db.session.query(
+            Pieza.nombre_pieza,
+            db.func.year(Reserva.fecha_llegada).label('año'),
+            db.func.month(Reserva.fecha_llegada).label('mes'),
+            db.func.sum((Pieza.precio_pieza - (Pieza.precio_pieza * Pieza.descuento / 100)) * db.func.datediff(Reserva.fecha_salida, Reserva.fecha_llegada)).label('ganancia')
+        )
+        .join(Reserva, Pieza.id == Reserva.habitacion_id)
+        .group_by(Pieza.nombre_pieza, 'año', 'mes')
+        .order_by('año', 'mes')
+        .all()
+    )
 
+    # Formatear datos en un diccionario
+    datos_grafico = {}
+    for nombre, año, mes, ganancia in resultados:
+        ganancia = ganancia or 0  # Evitar valores None
+        clave = f"{año}-{mes:02d}"
+        if clave not in datos_grafico:
+            datos_grafico[clave] = {}
+        datos_grafico[clave][nombre] = ganancia
 
+    return jsonify(datos_grafico)
+
+@app.route('/estadisticas_ganancias', methods=['GET'])
+def estadisticas_ganancias():
+    resultados = (
+        db.session.query(
+            Pieza.nombre_pieza,
+            db.func.year(Reserva.fecha_llegada).label('año'),
+            db.func.month(Reserva.fecha_llegada).label('mes'),
+            db.func.sum((Pieza.precio_pieza - (Pieza.precio_pieza * Pieza.descuento / 100)) * db.func.datediff(Reserva.fecha_salida, Reserva.fecha_llegada)).label('ganancia')
+        )
+        .join(Reserva, Pieza.id == Reserva.habitacion_id)
+        .group_by(Pieza.nombre_pieza, 'año', 'mes')
+        .order_by('año', 'mes')
+        .all()
+    )
+
+    datos_grafico = {}
+    for nombre, año, mes, ganancia in resultados:
+        ganancia = ganancia or 0  # Evitar valores None
+        clave = f"{año}-{mes:02d}"
+        if clave not in datos_grafico:
+            datos_grafico[clave] = {}
+        datos_grafico[clave][nombre] = ganancia
+
+    return render_template('estadisticas_ganancias.html', datos_grafico=datos_grafico)

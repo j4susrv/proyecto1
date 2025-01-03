@@ -13,150 +13,150 @@
 
 <body>
     {% block content %}
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="Logo">
-            </a>
-        </div>
-    </nav>
+        <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+            <div class="container">
+                <a class="navbar-brand" href="/">
+                    <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="Logo">
+                </a>
+            </div>
+        </nav>
 
-    <div class="form-container">
-        <h2>Reserva tu Habitación</h2>
-        <form action="{{ url_for('vista_piezas') }}" method="POST">
-            <div class="mb-3">
-                <label for="llegada" class="form-label">Llegada</label>
-                <input type="date" id="llegada" name="llegada" class="form-control" required>
+        <div class="form-container">
+            <h2>Reserva tu Habitación</h2>
+            <form action="{{ url_for('vista_piezas') }}" method="POST">
+                <div class="mb-3">
+                    <label for="llegada" class="form-label">Llegada</label>
+                    <input type="date" id="llegada" name="llegada" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="salida" class="form-label">Salida</label>
+                    <input type="date" id="salida" name="salida" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="personas" class="form-label">Personas</label>
+                    <input type="number" id="personas" name="personas" class="form-control" min="1" value="1" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">¡Vamos!</button>
+            </form>
+            {% if current_user.is_authenticated and current_user.es_admin() %}
+            <div class="mt-4">
+                <a href="{{ url_for('logout_admin') }}" class="btn btn-danger w-100 mb-2">Cerrar sesión</a>
+                <a href="{{ url_for('agregar_pieza') }}" class="btn btn-secondary w-100">Agregar Habitación</a>
+                <a href="{{ url_for('estadisticas') }}" class="btn btn-secondary w-100">Estadísticas</a>
             </div>
-            <div class="mb-3">
-                <label for="salida" class="form-label">Salida</label>
-                <input type="date" id="salida" name="salida" class="form-control" required>
-            </div>
-            <div class="mb-3">
-                <label for="personas" class="form-label">Personas</label>
-                <input type="number" id="personas" name="personas" class="form-control" min="1" value="1" required>
-            </div>
-            <button type="submit" class="btn btn-primary w-100">¡Vamos!</button>
-        </form>
-        {% if current_user.is_authenticated and current_user.es_admin() %}
-        <div class="mt-4">
-            <a href="{{ url_for('logout_admin') }}" class="btn btn-danger w-100 mb-2">Cerrar sesión</a>
-            <a href="{{ url_for('agregar_pieza') }}" class="btn btn-secondary w-100">Agregar Habitación</a>
-            <a href="{{ url_for('estadisticas') }}" class="btn btn-secondary w-100">Estadísticas</a>
+            {% endif %}
         </div>
-        {% endif %}
-    </div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const llegada = document.getElementById("llegada");
-            const salida = document.getElementById("salida");
-            const hoy = new Date();
-            const año = hoy.getFullYear();
-            const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-            const día = String(hoy.getDate()).padStart(2, '0');
-            const fechaFormateada = `${año}-${mes}-${día}`;
-            llegada.setAttribute('min', fechaFormateada);
-            salida.setAttribute('min', fechaFormateada);
-            llegada.addEventListener('change', function () {
-                const fechaLlegadaSeleccionada = llegada.value;
-                if (salida.value && salida.value <= fechaLlegadaSelecciosnada) {
-                    salida.value = "";
-                }
-                salida.setAttribute('min', fechaLlegadaSeleccionada);
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const llegada = document.getElementById("llegada");
+                const salida = document.getElementById("salida");
+                const hoy = new Date();
+                const año = hoy.getFullYear();
+                const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+                const día = String(hoy.getDate()).padStart(2, '0');
+                const fechaFormateada = `${año}-${mes}-${día}`;
+                llegada.setAttribute('min', fechaFormateada);
+                salida.setAttribute('min', fechaFormateada);
+                llegada.addEventListener('change', function () {
+                    const fechaLlegadaSeleccionada = llegada.value;
+                    if (salida.value && salida.value <= fechaLlegadaSelecciosnada) {
+                        salida.value = "";
+                    }
+                    salida.setAttribute('min', fechaLlegadaSeleccionada);
+                });
             });
-        });
-    </script>
+        </script>
 
-<style>
-    body {
-        font-family: 'DIN Condensed', sans-serif;
-        background: url('/static/imagenes/cocina-solycris.jpg') no-repeat center center fixed;
-        background-size: cover;
-        color: #fff;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-    }
-    .navbar {
-        background-color: #ffffff00;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
+        <style>
+            body {
+                font-family: 'DIN Condensed', sans-serif;
+                background: url('/static/imagenes/cocina-solycris.jpg') no-repeat center center fixed;
+                background-size: cover;
+                color: #fff;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                min-height: 100vh;
+                margin: 0;
+            }
+            .navbar {
+                background-color: #ffffff00;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
 
-    .navbar-brand {
-        font-weight: bold;
-        color: #f9f3e4;
-        display: flex;
-        align-items: center;
-    }
+            .navbar-brand {
+                font-weight: bold;
+                color: #f9f3e4;
+                display: flex;
+                align-items: center;
+            }
 
-    .navbar-brand img {
-        height: 40px;
-        margin-right: 10px;
-    }
+            .navbar-brand img {
+                height: 40px;
+                margin-right: 10px;
+            }
 
-    .form-container {
-        max-width: 500px;
-        background: rgba(0, 0, 0, 0.7);
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-        text-align: center;
-    }
+            .form-container {
+                max-width: 500px;
+                background: rgba(0, 0, 0, 0.7);
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+                text-align: center;
+            }
 
-    .form-container h2 {
-        color: #ffffff;
-        font-size: 2rem;
-        margin-bottom: 1.5rem;
-    }
+            .form-container h2 {
+                color: #ffffff;
+                font-size: 2rem;
+                margin-bottom: 1.5rem;
+            }
 
-    .form-container label {
-        color: #CDAF90;
-        font-size: 1.2rem;
-    }
+            .form-container label {
+                color: #CDAF90;
+                font-size: 1.2rem;
+            }
 
-    .form-container input {
-        background-color: #434343;
-        color: #fff;
-        border: 1px solid #CDAF90;
-        border-radius: 5px;
-    }
+            .form-container input {
+                background-color: #434343;
+                color: #fff;
+                border: 1px solid #CDAF90;
+                border-radius: 5px;
+            }
 
-    .form-container input:focus {
-        border-color: #B92516;
-        outline: none;
-        box-shadow: 0 0 4px rgba(185, 37, 22, 0.5);
-    }
+            .form-container input:focus {
+                border-color: #B92516;
+                outline: none;
+                box-shadow: 0 0 4px rgba(185, 37, 22, 0.5);
+            }
 
-    .form-container .btn-primary {
-        background-color: #B92516;
-        color: #fff;
-        border: none;
-        font-size: 1.2rem;
-        font-weight: bold;
-    }
+            .form-container .btn-primary {
+                background-color: #B92516;
+                color: #fff;
+                border: none;
+                font-size: 1.2rem;
+                font-weight: bold;
+            }
 
-    .form-container .btn-primary:hover {
-        background-color: #6e5033;
-    }
+            .form-container .btn-primary:hover {
+                background-color: #6e5033;
+            }
 
-    .form-container .btn-danger,
-    .form-container .btn-secondary {
-        font-weight: bold;
-    }
+            .form-container .btn-danger,
+            .form-container .btn-secondary {
+                font-weight: bold;
+            }
 
-    .form-container .btn-danger {
-        background-color: #434343;
-    }
+            .form-container .btn-danger {
+                background-color: #434343;
+            }
 
-    .form-container .btn-danger:hover {
-        background-color: #B92516;
-    }
+            .form-container .btn-danger:hover {
+                background-color: #B92516;
+            }
 
-</style>
-{% endblock %}
+        </style>
+    {% endblock %}
 </body>
 
 </html>
