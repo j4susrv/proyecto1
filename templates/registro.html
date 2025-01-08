@@ -77,17 +77,18 @@
     </div>
     <div id="rut_field" class="form-group mb-3" style="display: none;">
       <label for="rut" class="font-weight-bold">RUT</label>
-      <input type="text" id="rut" name="rut" class="form-control">
+      <input type="text" id="rut" name="rut" class="form-control" placeholder="12345678-9">
+      <small id="rut_error" class="text-danger" style="display: none;">El RUT ingresado no es válido.</small>
     </div>
+    
     <div id="pasaporte_field" class="form-group mb-3" style="display: none;">
       <label for="pasaporte" class="font-weight-bold">Pasaporte</label>
       <input type="text" id="pasaporte" name="pasaporte" class="form-control">
     </div>
 
-    <div class="form-group mb-3">
-      <label for="numero_celular" class="font-weight-bold">Número de Celular</label>
-      <input type="tel" id="numero_celular" name="numero_celular" required class="form-control">
-    </div>
+    <input type="text" id="numero_celular" name="numero_celular" class="form-control" required
+    maxlength="{{ longitud_numero_celular }}"
+    placeholder="Ingresa tu número de celular">
 
     <div class="form-group mb-3">
       <label for="correo" class="font-weight-bold">Correo Electrónico</label>
@@ -153,28 +154,23 @@
     });
   });
   $(document).ready(function() {
-    // Ocultar el campo de salida al cargar la página
     $('#salida').parent().hide();
 
-    // Manejar el cambio de la fecha de llegada
     $('#llegada').on('change', function() {
       var llegadaDate = $(this).val();
 
-      // Verificar si hay una fecha de llegada seleccionada
       if (llegadaDate) {
-        $('#salida').parent().show(); // Mostrar el campo de salida
-        $('#salida').attr('min', llegadaDate); // Configurar el mínimo para la salida
+        $('#salida').parent().show(); 
+        $('#salida').attr('min', llegadaDate);
       } else {
-        $('#salida').parent().hide(); // Ocultar el campo de salida si no hay llegada seleccionada
-        $('#salida').val(''); // Limpiar el valor de salida
+        $('#salida').parent().hide(); 
+        $('#salida').val('');
       }
     });
 
-    // Configurar fecha mínima para la llegada
     var today = new Date().toISOString().split('T')[0];
     document.getElementById("llegada").setAttribute("min", today);
 
-    // Asegurar consistencia entre fechas de llegada y salida
     $('#salida').on('change', function() {
       var llegadaDate = new Date($('#llegada').val());
       var salidaDate = new Date($(this).val());
@@ -189,5 +185,110 @@
             var today = new Date().toISOString().split('T')[0];
             document.getElementById("fecha_nacimiento").setAttribute("max", today);
         });
+        function validarRut(rut) {
+  if (!/^[0-9]+-[0-9kK]{1}$/.test(rut)) return false;
+
+  var [rutBody, dv] = rut.split("-");
+  var sum = 0, multiplier = 2;
+
+  for (var i = rutBody.length - 1; i >= 0; i--) {
+    sum += parseInt(rutBody[i]) * multiplier;
+    multiplier = multiplier === 7 ? 2 : multiplier + 1;
+  }
+
+  var calculatedDv = 11 - (sum % 11);
+  calculatedDv = calculatedDv === 11 ? "0" : calculatedDv === 10 ? "k" : calculatedDv.toString();
+
+  return dv.toLowerCase() === calculatedDv;
+}
+
+// Evento de Validación
+document.getElementById('rut').addEventListener('input', function () {
+  const rutInput = this.value.trim();
+  const rutError = document.getElementById('rut_error');
+
+  if (rutInput && !validarRut(rutInput)) {
+    rutError.style.display = 'block';
+  } else {
+    rutError.style.display = 'none';
+  }
+});
+document.addEventListener('DOMContentLoaded', function() {
+    const numerosNacionales = {
+        'AR': '+549', 
+        'BR': '+559',  
+        'CA': '+1',     
+        'CL': '+569', 
+        'CO': '+573',  
+        'MX': '+521', 
+        'PE': '+519',  
+        'US': '+1',     
+        'UY': '+598',  
+        'VE': '+584',  
+        'FR': '+33',    
+        'DE': '+49',   
+        'IT': '+39',   
+        'NL': '+31', 
+        'PT': '+351',  
+        'ES': '+34',  
+        'SE': '+46',    
+        'CH': '+41',    
+        'GB': '+44',  
+        'AU': '+61',    
+        'IN': '+91',    
+        'CN': '+86',    
+        'JP': '+81',    
+        'KR': '+82',    
+        'RU': '+7',     
+        'ZA': '+27',   
+    };
+
+    const longitudesPais = {
+      'AR': 12, 
+      'BR': 13,  
+      'CA': 12,  
+      'CL': 12,  
+      'CO': 12, 
+      'MX': 13,  
+      'PE': 13, 
+      'US': 12,  
+      'UY': 12,  
+      'VE': 13, 
+      'FR': 13,  
+      'DE': 13,  
+      'IT': 13,  
+      'NL': 13,  
+      'PT': 13,  
+      'ES': 13,  
+      'SE': 13,  
+      'CH': 13, 
+      'GB': 13,  
+      'AU': 13,  
+      'IN': 14, 
+      'CN': 14, 
+      'JP': 14,  
+      'KR': 14,  
+      'RU': 14,  
+      'ZA': 13,  
+    };
+
+    const paisSelect = document.getElementById('pais');
+    const numeroCelularInput = document.getElementById('numero_celular');
+
+    function actualizarNumeroCelular() {
+      const paisSeleccionado = paisSelect.value;
+
+      const prefijoCelular = numerosNacionales[paisSeleccionado] || '';
+      numeroCelularInput.value = prefijoCelular;
+
+      const longitud = longitudesPais[paisSeleccionado] || 0;
+      numeroCelularInput.maxLength = longitud;
+    }
+
+    paisSelect.addEventListener('change', actualizarNumeroCelular);
+
+    actualizarNumeroCelular();
+  });
 </script>
+
 {% endblock %}

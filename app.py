@@ -124,15 +124,47 @@ def register(habitacion_id):
     if not habitacion:
         flash("Habitación no encontrada.", "danger")
         return redirect(url_for('vista_piezas'))  
+    longitud_numero_celular = 0  
 
     if request.method == "POST":
         nombre_apellido = request.form['nombre_apellido']
         rut_pasaporte = request.form.get('rut') or request.form.get('pasaporte')
         fecha_nacimiento = request.form['fecha_nacimiento']
         pais = request.form['pais']
-        numero_celular = request.form['numero_celular']
+        numero_celular = str(request.form['numero_celular'])
         correo = request.form["correo"]
         personas = request.form.get('personas')
+
+        longitudes_pais = {
+            'AR': 12, 
+            'BR': 13, 
+            'CA': 12,  
+            'CL': 12,  
+            'CO': 12,
+            'MX': 13,  
+            'PE': 13,  
+            'US': 12, 
+            'UY': 12,  
+            'VE': 13,  
+            'FR': 13, 
+            'DE': 13, 
+            'IT': 13,  
+            'NL': 13,  
+            'PT': 13, 
+            'ES': 13, 
+            'SE': 13, 
+            'CH': 13, 
+            'GB': 13,  
+            'AU': 13, 
+            'IN': 14,  
+            'CN': 14,  
+            'JP': 14, 
+            'KR': 14,  
+            'RU': 14, 
+            'ZA': 13,  
+        }
+
+        longitud_numero_celular = longitudes_pais.get(pais, 0)
 
         if not personas or not personas.strip().isdigit():
             flash("La cantidad de personas debe ser un número válido mayor a 0.", "danger")
@@ -151,6 +183,7 @@ def register(habitacion_id):
         if overlapping_reservas:
             flash("La habitación ya está reservada para las fechas seleccionadas.", "danger")
             return redirect(url_for('register', habitacion_id=habitacion_id))
+        
         nuevo_usuario = Usuario(
             nombre_apellido=nombre_apellido,
             rut_pasaporte=rut_pasaporte,
@@ -161,7 +194,7 @@ def register(habitacion_id):
             fecha_llegada=llegada,
             fecha_salida=salida,
             cantidad_personas=personas,
-            habitacion_id = habitacion_id
+            habitacion_id=habitacion_id
         )
         db.session.add(nuevo_usuario)
         db.session.commit()
@@ -178,11 +211,18 @@ def register(habitacion_id):
 
         flash("Usuario y reserva registrados con éxito.", "success")
         return redirect(url_for('principal'))
+    
     llegada = request.args.get('llegada')
     salida = request.args.get('salida')
     cantidad_personas = request.args.get('personas')
 
-    return render_template('registro.html', llegada=llegada, salida=salida, cantidad_personas=cantidad_personas, pieza_id=habitacion_id, capacidad_habitacion=habitacion.cantidad_personas)
+    return render_template('registro.html', 
+                           llegada=llegada, 
+                           salida=salida, 
+                           cantidad_personas=cantidad_personas, 
+                           pieza_id=habitacion_id, 
+                           capacidad_habitacion=habitacion.cantidad_personas,
+                           longitud_numero_celular=longitud_numero_celular)
 
 @app.route('/agregarpieza', methods=['GET', 'POST'])
 def agregar_pieza():
@@ -374,10 +414,27 @@ def estadisticas_ganancias():
 
     datos_grafico = {}
     for nombre, año, mes, ganancia in resultados:
-        ganancia = ganancia or 0  # Evitar valores None
+        ganancia = ganancia or 0  
         clave = f"{año}-{mes:02d}"
         if clave not in datos_grafico:
             datos_grafico[clave] = {}
         datos_grafico[clave][nombre] = ganancia
 
     return render_template('estadisticas_ganancias.html', datos_grafico=datos_grafico)
+
+
+@app.route('/quienessomos')
+def quienes_somos():
+    return render_template('quienessomos.html')
+
+@app.route('/economia-circular')
+def economia_circular():
+    return render_template('economia_circular.html')
+
+@app.route('/convenios-alianzas')
+def convenios_alianzas():
+    return render_template('convenios_alianzas.html')
+
+@app.route('/panoramas')
+def panoramas():
+    return render_template('panoramas.html')
