@@ -2,12 +2,12 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block titulo %}LosRockstars{% endblock %}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=DIN+Condensed:wght@700&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </head>
 
@@ -16,9 +16,10 @@
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
             <a class="navbar-brand" href="/">
-                <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="Logo">
+                <img src="{{ url_for('static', filename='imagenes/logo.png') }}" alt="Logo" />
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
@@ -27,14 +28,27 @@
                         <a class="nav-link" href="#">Inicio</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
                             Más opciones
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('quienes_somos') }}">Quienes somos</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('economia_circular') }}">Economía circular</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('convenios_alianzas') }}">Convenios y alianzas</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('panoramas') }}">Panoramas</a></li>
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('quienes_somos') }}">Quienes somos</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('economia_circular') }}">Economía circular</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('convenios_alianzas') }}">Convenios y
+                                    alianzas</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('panoramas') }}">Panoramas</a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('iniciar_pago')}}">Pagar</a>
+                            </li>
                         </ul>
                     </li>
                     <li class="nav-item">
@@ -44,143 +58,323 @@
             </div>
         </div>
     </nav>
-    
-
-        <div class="form-container">
-            <h2>Reserva tu Habitación</h2>
-            <form action="{{ url_for('vista_piezas') }}" method="POST">
-                <div class="mb-3">
-                    <label for="llegada" class="form-label">Llegada</label>
-                    <input type="date" id="llegada" name="llegada" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="salida" class="form-label">Salida</label>
-                    <input type="date" id="salida" name="salida" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label for="personas" class="form-label">Personas</label>
-                    <input type="number" id="personas" name="personas" class="form-control" min="1" value="1" required>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">¡Vamos!</button>
-            </form>
-            {% if current_user.is_authenticated and current_user.es_admin() %}
-            <div class="mt-4">
-                <a href="{{ url_for('logout_admin') }}" class="btn btn-danger w-100 mb-2">Cerrar sesión</a>
-                <a href="{{ url_for('agregar_pieza') }}" class="btn btn-secondary w-100">Agregar Habitación</a>
-                <a href="{{ url_for('estadisticas') }}" class="btn btn-secondary w-100">Estadísticas</a>
-            </div>
-            {% endif %}
+    <div class="hero">
+        <div class="left-image">
+            <img src="/static/imagenes/patio.jpg" alt="Exterior View" />
         </div>
+    
+        <div class="right-image">
+            <img src="/static/imagenes/cocina-solycris2.jpg" alt="Interior View" />
+            <div class="text-overlay">
+                <h1>Un lugar seguro y cálido<br />en tu paso por el Sur de Chile</h1>
+            </div>
+        </div>
+    </div>
+    
+        <div class="social-links">
+            <a href="#"><img src="https://img.icons8.com/material-rounded/24/ffffff/facebook-new.png"alt="Facebook" /></a>
+            <a href="#"><img src="https://img.icons8.com/material-rounded/24/ffffff/twitter.png" alt="Twitter" /></a>
+            <a href="https://www.instagram.com/punto_rockstar/"><img src="https://img.icons8.com/material-rounded/24/ffffff/instagram-new.png"alt="Instagram" /></a>
+        </div>
+    </div>
+    <div class="form-container mt-5">
+        <h2>Reserva tu Habitación</h2>
+        <form action="{{ url_for('vista_piezas') }}" method="POST">
+            <div class="mb-3">
+                <label for="llegada" class="form-label">Llegada</label>
+                <input type="date" id="llegada" name="llegada" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label for="salida" class="form-label">Salida</label>
+                <input type="date" id="salida" name="salida" class="form-control" required />
+            </div>
+            <div class="mb-3">
+                <label for="personas" class="form-label">Personas</label>
+                <input type="number" id="personas" name="personas" class="form-control" min="1" value="1" required />
+            </div>
+            <button type="submit" class="btn btn-primary w-100">¡Vamos!</button>
+        </form>
+    </div>
+    <section class="intro-section">
+        <div class="content">
+            <h2>Para nuestros futuros huéspedes o colivers</h2>
+            <h1>Conoce nuestro estilo de vida, resultados y reglas</h1>
+            <a href="#rules" class="btn">Las reglas de la casa</a>
+        </div>
+    </section>
 
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                const llegada = document.getElementById("llegada");
-                const salida = document.getElementById("salida");
-                const hoy = new Date();
-                const año = hoy.getFullYear();
-                const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-                const día = String(hoy.getDate()).padStart(2, '0');
-                const fechaFormateada = `${año}-${mes}-${día}`;
-                llegada.setAttribute('min', fechaFormateada);
-                salida.setAttribute('min', fechaFormateada);
-                llegada.addEventListener('change', function () {
-                    const fechaLlegadaSeleccionada = llegada.value;
-                    if (salida.value && salida.value <= fechaLlegadaSelecciosnada) {
-                        salida.value = "";
-                    }
-                    salida.setAttribute('min', fechaLlegadaSeleccionada);
-                });
-            });
-        </script>
+    <section class="info-section">
+        <div class="grid-container">
+            <div class="grid-item">
+                <h3>+1780</h3>
+                <p>Huéspedes en 3 años</p>
+            </div>
+            <div class="grid-item">
+                <h3>+300</h3>
+                <p>Reviews</p>
+            </div>
+            <div class="grid-item">
+                <h3>10 camas</h3>
+                <p>Capacidad total 13</p>
+            </div>
+            <div class="grid-item">
+                <h3>+100 plantas</h3>
+                <p>Aprendemos y cultivamos</p>
+            </div>
+            <div class="grid-item">
+                <h3>+10 Tn</h3>
+                <p>Reciclados de orgánicos e inorgánicos</p>
+            </div>
+            <div class="grid-item">
+                <h3>Hecho a mano</h3>
+                <p>Nos inspira crear</p>
+            </div>
+            <div class="grid-item">
+                <h3>WiFi</h3>
+                <p>Alta velocidad</p>
+            </div>
+            <div class="grid-item">
+                <h3>Juegos</h3>
+                <p>Arcade, cartas y de mesa</p>
+            </div>
+            <div class="grid-item">
+                <h3>Cocina</h3>
+                <p>Libre uso</p>
+            </div>
+            <div class="grid-item">
+                <h3>Terraza</h3>
+                <p>Espacios comunes</p>
+            </div>
+            <div class="grid-item">
+                <h3>Estacionamiento</h3>
+                <p>Hasta 5 vehículos</p>
+            </div>
+            <div class="grid-item">
+                <h3>Pet Friendly</h3>
+                <p>¡Ven con tu compañero!</p>
+            </div>
+        </div>
+    </section>
 
-        <style>
-            body {
-                font-family: 'DIN Condensed', sans-serif;
-                background: url('/static/imagenes/cocina-solycris.jpg') no-repeat center center fixed;
-                background-size: cover;
-                color: #fff;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                min-height: 100vh;
-                margin: 0;
-            }
-            .navbar {
-                background-color: #ffffff00;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            }
+    <footer class="bg-dark text-light text-center py-3 mt-5">
+        <p>&copy; 2025 Los Rockstars. Todos los derechos reservados.</p>
+    </footer>
 
-            .navbar-brand {
-                font-weight: bold;
-                color: #f9f3e4;
-                display: flex;
-                align-items: center;
-            }
+    <style>
+        body {
+            font-family: "DIN Condensed", sans-serif;
+            background: url("/static/imagenes/cocina-solycris.jpg") no-repeat center center fixed;
+            background-size: cover;
+            color: #fff;
+            margin: 0;
+        }
 
-            .navbar-brand img {
-                height: 40px;
-                margin-right: 10px;
-            }
+        .navbar {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
 
-            .form-container {
-                max-width: 500px;
-                background: rgba(0, 0, 0, 0.7);
-                padding: 30px;
-                border-radius: 10px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-                text-align: center;
-            }
+        .navbar-brand img {
+            height: 40px;
+        }
 
-            .form-container h2 {
-                color: #ffffff;
-                font-size: 2rem;
-                margin-bottom: 1.5rem;
-            }
+        .hero {
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            background-blend-mode: darken;
+            text-align: center;
+        }
 
-            .form-container label {
-                color: #CDAF90;
-                font-size: 1.2rem;
-            }
+        .form-container {
+            max-width: 500px;
+            margin: auto;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
 
-            .form-container input {
-                background-color: #434343;
-                color: #fff;
-                border: 1px solid #CDAF90;
-                border-radius: 5px;
-            }
+        .btn-primary {
+            background-color: #b92516;
+            border: none;
+        }
 
-            .form-container input:focus {
-                border-color: #B92516;
-                outline: none;
-                box-shadow: 0 0 4px rgba(185, 37, 22, 0.5);
-            }
+        footer {
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
 
-            .form-container .btn-primary {
-                background-color: #B92516;
-                color: #fff;
-                border: none;
-                font-size: 1.2rem;
-                font-weight: bold;
-            }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-            .form-container .btn-primary:hover {
-                background-color: #6e5033;
-            }
+        body {
+            font-family: "Roboto", sans-serif;
+        }
 
-            .form-container .btn-danger,
-            .form-container .btn-secondary {
-                font-weight: bold;
-            }
+        .hero {
+            display: flex;
+            flex-direction: row;
+            height: 100vh;
+            overflow: hidden;
+        }
 
-            .form-container .btn-danger {
-                background-color: #434343;
-            }
+        .hero .left-image,
+        .hero .right-image {
+            width: 50%;
+            position: relative;
+        }
 
-            .form-container .btn-danger:hover {
-                background-color: #B92516;
-            }
+        .hero .left-image img,
+        .hero .right-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-        </style>
+        .hero .text-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+        }
+
+        .hero .text-overlay h1 {
+            font-size: 3rem;
+            line-height: 1.2;
+            font-weight: bold;
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+        }
+
+        .social-links {
+            position: absolute;
+            top: 20%;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border-radius: 50%;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+
+        .social-links a:hover {
+            background: rgba(255, 255, 255, 0.6);
+            color: black;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .intro-section {
+            text-align: center;
+            padding: 50px;
+            background: #6c63ff;
+            color: white;
+        }
+
+        .info-section {
+            background: #f5f5f5;
+            padding: 30px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .grid-item {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .grid-item h3 {
+            font-size: 24px;
+            color: #6c63ff;
+        }
+
+        .grid-item p {
+            font-size: 16px;
+            color: #555;
+        }
+
+        .gallery-section {
+            padding: 30px;
+        }
+
+        .image-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .image-row img {
+            width: 30%;
+            border-radius: 10px;
+        }
+        .hero {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+}
+
+.hero .left-image,
+.hero .right-image {
+    flex: 1; /* Asegura que ambas imágenes ocupen el mismo espacio */
+    position: relative;
+}
+
+.hero .left-image img,
+.hero .right-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero .text-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.hero .text-overlay h1 {
+    font-size: 3rem;
+    line-height: 1.2;
+    font-weight: bold;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+}
+
+    </style>
     {% endblock %}
 </body>
 

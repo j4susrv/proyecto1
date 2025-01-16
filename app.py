@@ -2,15 +2,41 @@ from flask import Flask, render_template, flash, redirect, request, url_for
 from flask_sqlalchemy import SQLAlchemy  # Base de datos
 from flask_migrate import Migrate  # Versiones de bases de datos
 from flask_login import LoginManager, logout_user, current_user, login_required, login_user
-from datetime import datetime, timedelta
+import datetime
+import  os 
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask import jsonify
-import re, os 
+from dotenv import load_dotenv
+from transbank.webpay.webpay_plus.transaction import Transaction
+from transbank.common.options import WebpayOptions
+from transbank.common.integration_commerce_codes import IntegrationCommerceCodes
+from transbank.common.integration_api_keys import IntegrationApiKeys
+from transbank.common.integration_type import IntegrationType
+import logging, uuid
+
+
 UPLOAD_FOLDER = 'static/imagenes'  
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app = Flask(__name__)
+
+COMMERCE_CODE = "597055555532"  
+API_KEY = "579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C"  
+
+if not COMMERCE_CODE or not API_KEY:
+    raise ValueError("Las credenciales de Webpay no están configuradas correctamente.")
+
+BASE_URL = "http://localhost:5000"  # Cambiar según tu dominio/localhost
+Transaction.commerce_code = COMMERCE_CODE
+Transaction.api_key = API_KEY
+Transaction.environment = "TEST"
+
+# Configurar el nivel de logs
+logging.basicConfig(level=logging.DEBUG)
+
+app.logger.setLevel(logging.DEBUG)
+
 app.config["SECRET_KEY"] = "losrockstars"  
 app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+mysqlconnector://root@localhost/rockstars"  
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False 
@@ -31,7 +57,7 @@ Migrate(app, db)
 # Importar los formularios y modelos
 from forms import FormularioRegistro, FormularioLoginAdministrador, FormularioRegistroAdministrador
 from controlers import ControladorAdministrador
-from models import Usuario, Administrador, Pieza, Reserva
+from models import Usuario, Administrador, Pieza, Reserva, Pago
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -124,6 +150,7 @@ def register(habitacion_id):
     if not habitacion:
         flash("Habitación no encontrada.", "danger")
         return redirect(url_for('vista_piezas'))  
+    
     longitud_numero_celular = 0  
 
     if request.method == "POST":
@@ -210,7 +237,7 @@ def register(habitacion_id):
         db.session.commit()
 
         flash("Usuario y reserva registrados con éxito.", "success")
-        return redirect(url_for('principal'))
+        return redirect(url_for('iniciar_pago'))
     
     llegada = request.args.get('llegada')
     salida = request.args.get('salida')
@@ -389,7 +416,7 @@ def api_datos_grafico():
     # Formatear datos en un diccionario
     datos_grafico = {}
     for nombre, año, mes, ganancia in resultados:
-        ganancia = ganancia or 0  # Evitar valores None
+        ganancia = ganancia or 0  # 
         clave = f"{año}-{mes:02d}"
         if clave not in datos_grafico:
             datos_grafico[clave] = {}
@@ -438,3 +465,90 @@ def convenios_alianzas():
 @app.route('/panoramas')
 def panoramas():
     return render_template('panoramas.html')
+
+import uuid
+
+def obtener_datos_pago():
+
+    buy_order = str(uuid.uuid4())[:26]  
+    session_id = str(uuid.uuid4())
+    amount = 12000  
+    return buy_order, session_id, amount
+
+
+@app.route("/iniciar_pago")
+def iniciar_pago():
+    buy_order, session_id, amount = obtener_datos_pago()
+    return_url = f"{BASE_URL}/resultado_pago"
+
+    try:
+        tx = Transaction()
+        response = tx.create(buy_order, session_id, amount, return_url)
+
+        url = response["url"]
+        token = response["token"]
+
+        return render_template("pago.html", url=url, token=token)
+    except Exception as e:
+        return render_template("error.html", error_message="Error al iniciar el pago: " + str(e))
+@app.route("/resultado_pago", methods=["GET", "POST"])
+def resultado_pago():
+    token_ws = request.args.get('token_ws')
+
+    if not token_ws:
+        return render_template("error.html", error_message="No se ha recibido el token del pago.")
+
+    try:
+        tx = Transaction()
+
+        response = tx.commit(token_ws)
+
+        print(f"Respuesta del sistema de pago: {response}")
+
+        status = response.get("status")
+        buy_order = response.get("buy_order")
+        amount = response.get("amount")
+
+        if not status:
+            return render_template("error.html", error_message="No se ha recibido el estado del pago.")
+        
+        if status == 'ABORTED':
+            error_message = response.get('error_message', 'La transacción fue abortada.')
+            return render_template("error.html", error_message=f"Error en el pago: {error_message}")
+        
+        nuevo_pago = Pago(
+            orden_compra=buy_order,
+            monto=amount,
+            estado=status,
+            token_ws=token_ws
+        )
+        db.session.add(nuevo_pago)
+        db.session.commit()
+
+        return redirect(url_for("exito_pago", status=status, buy_order=buy_order, amount=amount))
+
+    except Exception as e:
+        return render_template("error.html", error_message="Error al procesar el pago: " + str(e))
+
+@app.route("/exito_pago")
+def exito_pago():
+    buy_order = request.args.get("buy_order")
+    amount = request.args.get("amount")
+    status = request.args.get("status")
+
+    if not buy_order or not amount or not status:
+        return render_template("error.html", error_message="Faltan parámetros en la respuesta del pago.")
+
+    if status == "AUTHORIZED":
+        return render_template("exito_pago.html", buy_order=buy_order, amount=amount, status=status)
+    else:
+        return render_template("error.html", error_message="Pago no autorizado o fallido.")
+
+@app.route('/fallo_pago')
+def fallo_pago():
+    return "<h1>Hubo un problema con el pago.</h1><p>Por favor, intenta nuevamente.</p>"
+
+@app.route('/error_pago')
+def error_pago():
+    error_message = request.args.get('error_message', 'Ocurrió un error desconocido')
+    return f"<h1>Error al procesar el pago</h1><p>{error_message}</p>"

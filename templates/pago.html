@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Pago</title>
+    <link rel="stylesheet" href="/static/styles.css">
+
+</head>
+<body>
+    <header>
+        <h1>Iniciar Pago</h1>
+    </header>
+    <main>
+        <section>
+                <p>Estás a punto de realizar un pago de <strong>$12,000</strong>.</p>
+            
+                <form method="post" action="{{ url }}">
+                    <input type="hidden" name="token_ws" value="{{ token }}">
+                    <input type="submit" value="Ir a pagar" style="padding: 10px 20px; font-size: 16px; background-color: #007bff; color: white; border: none; cursor: pointer;" />
+                </form>
+            
+                <!-- Mostrar el mensaje de log dinámico -->
+                {% if mensaje_de_log %}
+                    <p>{{ mensaje_de_log }}</p>
+                {% endif %}
+        </section>
+    </main>
+</body>
+</html>

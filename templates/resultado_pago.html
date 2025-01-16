@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultado del Pago</title>
+    <style>
+        .success { color: green; }
+        .error { color: red; }
+        .message { font-size: 1.2em; }
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Resultado del Pago</h1>
+    {% if status == 'AUTHORIZED' %}
+        <p class="success">¡Tu pago ha sido exitoso!</p>
+        <a href="{{ url_for('exito_pago', buy_order=buy_order, amount=amount, status=status) }}" class="button">Ver detalles</a>
+    {% else %}
+        <p class="error">Hubo un problema con el pago. Estado: {{ status }}</p>
+        <a href="{{ url_for('iniciar_pago') }}" class="button">Volver a intentar</a>
+    {% endif %}
+</body>
+</html>

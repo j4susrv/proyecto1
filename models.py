@@ -1,10 +1,9 @@
 from app import db
-from flask_login import UserMixin, LoginManager
+from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash  # seguridad
 from sqlalchemy import Column, Integer, ForeignKey, DateTime, Date
 from sqlalchemy.orm import relationship
 from datetime import date
-
 
 class Usuario(db.Model):
     __tablename__ = 'usuarios'
@@ -21,6 +20,7 @@ class Usuario(db.Model):
     habitacion_id = db.Column(db.Integer, db.ForeignKey('habitaciones.id'), nullable=False)
 
     reservas = db.relationship('Reserva', back_populates='usuario', lazy=True)
+    metodos_pago = db.relationship('MetodoPago', back_populates='usuario', lazy=True)
 
     def es_admin(self):
         return False
@@ -80,3 +80,22 @@ class Reserva(db.Model):
 
     habitacion = db.relationship('Pieza', back_populates='reservas', lazy=True)
     usuario = db.relationship('Usuario', back_populates='reservas', lazy=True)
+
+
+class MetodoPago(db.Model):
+    __tablename__ = 'metodos_pago'
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False)  
+    detalles = db.Column(db.Text, nullable=True)         
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
+
+    usuario = db.relationship('Usuario', back_populates='metodos_pago', lazy=True)
+
+class Pago(db.Model):
+    __tablename__ = 'pago'
+    id = db.Column(db.Integer, primary_key=True)
+    orden_compra = db.Column(db.String(50), nullable=False)
+    monto = db.Column(db.Float, nullable=False)
+    estado = db.Column(db.String(20), nullable=False)
+    token_ws = db.Column(db.String(255), nullable=False)
+    fecha = db.Column(db.DateTime, default=db.func.current_timestamp())

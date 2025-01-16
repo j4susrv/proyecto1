@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error en el Pago</title>
+</head>
+<body>
+    <h1>Error al procesar el pago</h1>
+    <p>{{ error_message }}</p>
+    <a href="{{ url_for('iniciar_pago') }}">Intentar nuevamente</a>
+</body>
+</html>
